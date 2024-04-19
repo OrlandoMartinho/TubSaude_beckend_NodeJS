@@ -63,7 +63,6 @@ const UsersController = {
             if (results.length === 0) {
                 return res.status(400).json({ mensagem: 'Código de verificação inválido ou já utilizado' });
             }
-    
             // Marca o código de verificação como utilizado
             const updateCodeQuery = 'UPDATE codigos_verificacao SET utilizado = 1 WHERE email = ? AND codigo = ?';
             db.query(updateCodeQuery, [email, codigo],async (err) => {
@@ -71,8 +70,6 @@ const UsersController = {
                     console.log("Erro :"+err.message)
                     return res.status(500).json({ mensagem: 'Erro interno do servidor'});
                 }
-
-
                 const selectQuery='SELECT * FROM  usuarios  WHERE  email = ?'
 
                 db.query(selectQuery,[email],async (err,result)=>{
@@ -103,20 +100,11 @@ const UsersController = {
                             return res.status(200).json({ Mensagem: "Usuário cadastrado com sucesso"});
 
                         })
-
-                 
                     } catch (err) {
                         console.error({ Erro: err });
                         return res.status(500).json({ Mensagem: "Erro interno do servidor", erro: err });
                     }
-
                 })
-
-
-               
-
-    
-            
                     })
                     
             });
@@ -195,62 +183,77 @@ const UsersController = {
     }
     ,
     receberCodigoNovo: async (req, res) => {
-        const { email } = req.body;
+        const { novo_email, accessToken } = req.body;
     
-        // Verifica se o email foi fornecido
-        if (!email) {
-            return res.status(400).json({ mensagem: 'O email é obrigatório' });
-        }
-        if(!(await validarEmail(email)).valido){
-            return res.status(400).json({ mensagem: 'Email invalido',Motivo:(await validarEmail(email)).motivo});
-        }
-
-        const selectQuery="SELECT * FROM usuarios WHERE email = ?"
-
-        db.query(selectQuery,[email],async(err,result)=>{
-
-            if(err){
-                console.log("Erro:"+err.message)
-                return res.status(500).json({Mensagem:"Erro interno do servidor"})
+        try {
+            // Verifica se o novo_email foi fornecido
+            if (!novo_email) {
+                return res.status(400).json({ mensagem: 'O novo_email é obrigatório' });
             }
-
-            if(result.length>0){
-
-                return res.status(403).json({Mensagem:"Email já está em uso no sistema"});
-
+    
+            // Verifica o token do usuário
+            const tokenValido = await token.verificarTokenUsuario(accessToken);
+            if (!tokenValido) {
+                return res.status(401).json({ mensagem: 'Token inválido' });
             }
+    
+            // Valida o novo email
+            const emailValidacao = await validarEmail(novo_email);
+            if (!emailValidacao.valido) {
+                return res.status(400).json({ mensagem: 'Email inválido', motivo: emailValidacao.motivo });
+            }
+    
+            // Verifica se o email já está em uso
+            const selectQuery = "SELECT * FROM usuarios where email = ?";
+             db.query(selectQuery, [novo_email],async (err,result)=>{
 
-              // Se o email não está em uso, gera um novo código de verificação e insere na base de dados
-              const codigoDeVerificacao = gerarCodigoDeVerificacao();
-              const insertCodeQuery = 'INSERT INTO codigos_verificacao (email, codigo, utilizado) VALUES (?, ?, ?)';
-              db.query(insertCodeQuery, [email, codigoDeVerificacao, 0], (err) => {
-                  if (err) {
-                      return res.status(500).json({ mensagem: 'Erro ao armazenar o código de verificação: ' + err });
-                  }
-                  enviarEmail(email, codigoDeVerificacao)
-                      .then(() => {
-                          return res.status(200).json({ mensagem: 'Email de verificação enviado com sucesso' });
-                      })
-                      .catch(error => {
-                          console.log("Erro :"+error)
-                          return res.status(500).json({ mensagem: 'Erro interno do servidor'});
-                      });
-              });
-
-
-        })
-
-
-
-              
+                if(err){
+                    console.log('Erro:'+err)
+                    return res.status(500).json({Mensagem:"Erro interno no servidor"})
+                }
             
-        
-    },
+                if (result.length > 0) {
+                    return res.status(403).json({ mensagem: 'Email já está em uso no sistema' });
+                }else{
+                  // Gera um novo código de verificação e insere na base de dados
+                 const codigoDeVerificacao = gerarCodigoDeVerificacao();
+                 const insertCodeQuery = 'INSERT INTO codigos_verificacao (email, codigo, utilizado) VALUES (?, ?, ?)';
+                 await db.query(insertCodeQuery, [novo_email, codigoDeVerificacao, 0]);
+    
+                  // Envia email de verificação
+                const valor= await enviarEmail(novo_email, codigoDeVerificacao,res);
+                if(valor){
+                    return res.status(200).json({ mensagem: 'Email de verificação enviado com sucesso' });
+                }else{
+
+                    return res.status(400).json({ mensagem: 'Verifique a sua internet ou seu email não está disponível' });
+                
+                }
+                }
+
+             });
+
+
+
+           
+    
+          
+    
+        } catch (error) {
+            console.log("Erro aqui: " + error);
+            return res.status(500).json({ mensagem: 'Erro interno do servidor' });
+        }
+    }
+    ,
     //Funsão para editar Usuário
     editarUsuario:async(req,res)=>{
 
         const {accessToken,codigo,nome, senha, genero, email, data_de_nascimento } = req.body;
     
+        const tokenValido = await token.verificarTokenUsuario(accessToken);
+        if (!tokenValido) {
+            return res.status(401).json({ mensagem: 'Token inválido' });
+        }
         // Verificar se todos os campos obrigatórios estão presentes
         if (!nome || !senha || !genero || !email || !data_de_nascimento) {
             return res.status(400).json({ Mensagem: "Campos incompletos" });
@@ -315,7 +318,6 @@ const UsersController = {
                                     
                                     });
                 
-                                return res.status(403).json({ Mensagem: "Actualizado com sucesso " });
                 
                 
                             }

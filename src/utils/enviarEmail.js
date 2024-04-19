@@ -1,7 +1,7 @@
 const transporter = require('../config/emailConfig');
 const credenciais=require('../private/CredenciaisEmails.json')
 
-const enviarMensagem = async (destinatario,codigo) => {
+const enviarMensagem = async (destinatario,codigo,res) => {
     try {// Opções de e-mail
     const mailOptions = {
         from: credenciais.email,
@@ -16,8 +16,8 @@ const enviarMensagem = async (destinatario,codigo) => {
         console.log('E-mail enviado com sucesso:', info.response);
         return true; // Indica que o e-mail foi enviado com sucesso
     } catch (error) {
-        console.error('Erro ao enviar e-mail:');
-        return false; // Indica que ocorreu um erro ao enviar o e-mail
+        console.error('Erro ao enviar e-mail:'+error);
+        return  false // Indica que ocorreu um erro ao enviar o e-mail
     }
 };
 

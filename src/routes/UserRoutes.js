@@ -13,7 +13,7 @@ router.post('/todos_usuarios',UsersController.obterTodosUsuarios)
 //Rota para Editar Usuario
 router.put('/',UsersController.editarUsuario)
 //Verificar Email Novo_token
-router.post('/',UsersController.receberCodigoNovo)
+router.put('/receber_codigo_novo',UsersController.receberCodigoNovo)
 //Rotas para eliminar Usuario
 router.delete('/',UsersController.eliminarUsuario)
 // Rota para obter usuário por accessToken
