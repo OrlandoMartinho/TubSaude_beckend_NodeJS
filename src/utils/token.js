@@ -91,10 +91,10 @@ const token = {
     },
     verificarTokenUsuario: (accessToken) => {
         return new Promise((resolve, reject) => {
-            const email = token.usuarioId(accessToken);
-            console.log(email)
+            const id_usuario = token.usuarioId(accessToken);
+
             const query = 'SELECT token FROM usuarios WHERE id_usuario = ?';
-            db.query(query, [email], (err, result) => {
+            db.query(query, [id_usuario], (err, result) => {
                 if (err) {
                     console.error('Erro ao buscar token do usuário:', err);
                     reject(err);

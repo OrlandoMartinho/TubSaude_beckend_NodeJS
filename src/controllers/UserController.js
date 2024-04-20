@@ -289,12 +289,6 @@ const UsersController = {
 
              });
 
-
-
-           
-    
-          
-    
         } catch (error) {
             console.log("Erro aqui: " + error);
             return res.status(500).json({ mensagem: 'Erro interno do servidor' });
@@ -516,7 +510,6 @@ const UsersController = {
                 }
                 const {accessToken } = req.body;
                 const tokenValido = await token.verificarTokenUsuario(accessToken);
-                console.log(accessToken);
                 if (!tokenValido) {
                     return res.status(401).json({ mensagem: 'Token inválido' });
                 }
@@ -534,8 +527,8 @@ const UsersController = {
                 }
 
                         const id_usuario=token.usuarioId(accessToken)
-                        const email=token.usuarioSenha(accessToken)
-                        const senha=token.usuarioEmail(accessToken)
+                        const email=token.usuarioEmail(accessToken)
+                        const senha=token.usuarioSenha(accessToken)
                         const nomeFoto = `${id_usuario}${extensao}`;
                         const pathFoto = `./uploads/${nomeFoto}`;
                         fs.writeFileSync(pathFoto, foto.buffer); 

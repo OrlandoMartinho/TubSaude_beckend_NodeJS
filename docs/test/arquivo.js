@@ -10,7 +10,7 @@ async function enviarArquivo() {
 
         // Dados do arquivo para enviar para a API
         const dadosArquivo = {
-            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb3RvIjoiLi91cGxvYWRzLzQwMC5qcGciLCJpZF91c3VhcmlvIjo0MDAsImVtYWlsIjoiJDJiJDEwJHBzU3NHSnNZWkJMNmtpZlBwTy8uZU9WVFhOV0VvWC91QkluY3NvcU9MeC9ROG5ienRsYU8yIiwic2VuaGEiOm51bGwsImlhdCI6MTcxMzU5NDYwMH0.YacZ5h2upAF0ELSAIaiAkQGoQZISzKg_nq1OmtFx9Q0'
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxMTcsImVtYWlsIjoib3JsYW5kb3BlZHJvMTc2QGdtYWlsLmNvbSIsIm5vbWVfZGVfdXN1YXJpbyI6Im9ybGFuZG9wZWRyb3NhaW9tYm8iLCJzZW5oYSI6IiQyYiQxMCRJNlRHLnZ0VFg3QVBHMjhBbHlMMkFPaFZFZGRUZERIOWFWTEVJSnE5eDR2ZUtaRWtmSkFKcSIsImlhdCI6MTcxMzYyMzgyMn0.kVFn4eFibUtOrweDOYTwCuVdGwFhT1EZU4aT3IxlzmY'
         };
 
         // Caminho do arquivo a ser enviado
