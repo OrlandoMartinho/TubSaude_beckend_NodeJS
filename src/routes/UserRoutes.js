@@ -17,6 +17,10 @@ router.put('/receber_codigo_novo',UsersController.receberCodigoNovo)
 //Rotas para eliminar Usuario
 router.delete('/',UsersController.eliminarUsuario)
 // Rota para obter usuário por accessToken
-router.post('/obter-usuario-por-accesstoken', UsersController.obterUsuarioPorAccessToken);
+router.post('/obter_usuario_por_token', UsersController.obterUsuarioPorAccessToken);
+//Rota para cdastrar foto do usuario
+router.post('/cadastrar_foto', UsersController.cadastrarFoto)
+//Rota para obter foto do usuário
+router.post('/foto', UsersController.obterFoto) 
 
 module.exports = router;

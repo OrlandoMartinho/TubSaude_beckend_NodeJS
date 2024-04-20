@@ -44,6 +44,18 @@ Esta pasta contém a documentação do projeto, incluindo diagramas de classes e
 
 - `SQL`: Esta pasta contém o banco de dados em formato SQL.
 
+## Respostas
+
+Todas as rotas são retornadas no formado `json`,e cada resposta contém um status HTTP
+
+- **200**:A solicitação foi bem feita mas nenhum recurso foi gerado
+- **201**:A solicitação foi feita e um recurso foi gerado na resposta.
+- **400**:A solicitação é inválida porque os  dados de entrada estão incorretos ou ausentes.
+- **401**:A solicitação requer autenticação e o usuário não foi autenticado ou o token foi alterado.
+- **403**:A solicitação foi bem feita, mas o servidor se recusa a autorizá-la por usar um dado inválido ou cadastrar um usuario existente.
+- **404**:O resurso não foi encontrado
+- **500**:Houve um erro dentro do servidor 
+
 ## Rotas de Usuário
 
 ### 1. Receber Código de Verificação

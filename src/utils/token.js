@@ -7,7 +7,31 @@ const token = {
         try {
             const decodedToken = jwt.verify(accessToken, secretKey.secretKey)
             if (decodedToken) {
-                return decodedToken.id;
+                return decodedToken.id_usuario;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            return null;
+        }
+    },
+    usuarioNome: (accessToken) => {
+        try {
+            const decodedToken = jwt.verify(accessToken, secretKey.secretKey)
+            if (decodedToken) {
+                return decodedToken.nome_de_usuario;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            return null;
+        }
+    },
+    usuarioFoto: (accessToken) => {
+        try {
+            const decodedToken = jwt.verify(accessToken, secretKey.secretKey)
+            if (decodedToken) {
+                return decodedToken.foto;
             } else {
                 return null;
             }
@@ -41,23 +65,11 @@ const token = {
             return null;
         }
     },
-    ExtrairTokenAdm: (accessToken) => {
-        try {
-            const decodedToken = jwt.verify(accessToken, secretKey.secretKey);
-            if (!decodedToken.accessToken) {
-                return null;
-            } else {
-                return decodedToken.accessToken;
-            }
-        } catch (err) {
-            return null;
-        }
-    },
     admId: (accessToken) => {
         try {
             const decodedToken = jwt.verify(accessToken, secretKey.secretKey);
-            if (decodedToken.user.id != null) {
-                return decodedToken.user.id;
+            if (decodedToken.id != null) {
+                return decodedToken.id;
             } else {
                 return null;
             }
@@ -77,29 +89,10 @@ const token = {
             return null;
         }
     },
-    verificarTokenMedico: (accessToken) => {
-        return new Promise((resolve, reject) => {
-            const email = token.medicoId(accessToken);
-            const query = 'SELECT accessToken FROM medicos WHERE id_medico = ?';
-            db.query(query, [email], (err, result) => {
-                if (err) {
-                    console.error('Erro ao buscar token do médico:', err);
-                    reject(err);
-                } else {
-                    if (result.length === 0) {
-                        resolve(false);
-                    } else {
-                        const medicoToken = result[0].accessToken;
-                        resolve(medicoToken === accessToken);
-                    }
-                }
-            });
-        });
-    },
-    
     verificarTokenUsuario: (accessToken) => {
         return new Promise((resolve, reject) => {
             const email = token.usuarioId(accessToken);
+            console.log(email)
             const query = 'SELECT token FROM usuarios WHERE id_usuario = ?';
             db.query(query, [email], (err, result) => {
                 if (err) {
@@ -116,7 +109,6 @@ const token = {
             });
         });
     },
-    
     verificarEmailUsuario: (email) => {
         return new Promise((resolve, reject) => {
             const query = 'SELECT * FROM usuarios WHERE email = ?';

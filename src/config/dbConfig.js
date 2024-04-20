@@ -1,7 +1,10 @@
-
-const mysql = require('mysql');
+const admCredenciais=require('../private/CredenciaisADM.json') 
+const mysql = require('mysql2');
 const keysBd = require('../private/keyDb.json');
 const databaseCreate=require('./CreateDataBase')
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const salt = bcrypt.genSaltSync(saltRounds);
 // Chaves de conexão com o banco de dados
 const dbConfig = {
   host: keysBd.host,
@@ -9,9 +12,10 @@ const dbConfig = {
   password: keysBd.password,
   database: keysBd.database
 };
-
-// Criar uma conexão com o banco de dados
 const connection = mysql.createConnection(dbConfig);
+
+
+
 
 // Conectar ao banco de dados
 connection.connect((err) => {
@@ -22,4 +26,5 @@ connection.connect((err) => {
 });
 
 // Exportar a conexão para uso em outros arquivos
+
 module.exports = connection;

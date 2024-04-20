@@ -4,101 +4,92 @@ const token = require('../utils/token');
 
 const notificacoesController = {
     // Adiciona uma notificação para um médico ou usuário com base no accessToken fornecido
-    addNotificacao:async (accessTokenDoctor, notificacao,accessTokenUser) => {
+    addNotificacao:async (notificacao) => {
         try {
-            // Obtém o ID do médico a partir do token
-            const id_medico = token.medicoId(accessTokenDoctor);
-            // Obtém o ID do usuário a partir do token
-            const id_usuario = token.usuarioId(accessTokenUser);
-            if( !(await token.verificarTokenUsuario(accessTokenUser)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
-            }
           
-            // Verifica se o token pertence a um usuário ou médico
-            if (id_usuario) {
-                // Se o token pertencer a um usuário, insere a notificação associando-a ao usuário
-              
-                const inserirNotificacao = `INSERT INTO notificacoes (descricao,data_da_notificacao ,id_usuario) VALUES (?, ?, ?)`;
-                db.query(inserirNotificacao, [notificacao,data, id_usuario], (err, result) => {
+                const inserirNotificacao = `INSERT INTO notificacoes (conteudo) VALUES (?)`;
+                db.query(inserirNotificacao, [notificacao], (err, result) => {
                     if (err) {
                         console.error('Erro ao armazenar a notificação para o usuário:', err.message);
                         return;
                     }
-                    console.log("Nova notificação adicionada para usuário com sucesso");
+                    console.log("Nova notificação adicionada com sucesso");
                 });
-            }
-
-            if (id_medico) {
-                // Se o token pertencer a um médico, insere a notificação associando-a ao médico
-                const date = data.toString();
-                const inserirNotificacao = `INSERT INTO notificacoes (descricao, data_da_notificacao, id_medico) VALUES (?, ?, ?)`;
-                db.query(inserirNotificacao, [notificacao, date, id_medico], (err, result) => {
-                    if (err) {
-                        console.error('Erro ao armazenar a notificação para o médico:', err.message);
-                        return;
-                    }
-                    console.log("Nova notificação adicionada para médico com sucesso");
-                });
-            }
+             
         } catch (error) {
             console.error('Erro ao decodificar o token do usuário:', error.message);
         }
     },
-
     // Obtém todas as notificações de um médico ou usuário com base no accessToken fornecido
     obterTodasNotificacoes: async (req, res) => {
-        try {
-            const { accessToken } = req.body;
-            const id_medico = token.medicoId(accessToken);
-            const id_usuario = token.usuarioId(accessToken);
- console.log(id_medico+"==="+id_usuario)
-            // Verifica se o token é válido e se pertence a um médico ou usuário
-            if (!id_medico && !id_usuario) {
-                return res.status(200).json({ erro: 'Token inválido' });
+
+
+        const {accessToken} = req.body
+
+        const {email} = jwt.verify(accessToken, secretKey.secretKey);
+
+        const selectQuery='SELECT token FROM usuarios WHERE email = ?'
+
+        db.query(selectQuery,[email],async (err, result) => {
+
+            if(err){
+                console.log("Erro:"+err.message)
+                return res.status(500).json({Mensagem:"Erro interno do servidor"})
             }
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+    
+            if(result[0].token!=accessToken){
+                return res.status(401).json({Mensagem:"Token inválido"})
             }
 
-            let query = '';
-            if (id_medico) {
-                // Se o token pertencer a um médico, busca todas as notificações associadas a ele
-                query = 'SELECT * FROM notificacoes WHERE id_medico = ?';
-            } else {
-                // Se o token pertencer a um usuário, busca todas as notificações associadas a ele
-                query = 'SELECT * FROM notificacoes WHERE id_usuario = ?';
-            }
-
-            db.query(query, [id_medico || id_usuario], (err, result) => {
-                if (err) {
-                    console.log('Erro ao buscar notificações:', err.message);
-                    return res.status(500).json({ erro: 'Erro ao buscar notificações' });
+            const selectQuery2 = "SELECT * FROM notificacoes";
+            db.query(selectQuery2,(err,result)=>{
+                
+                if(err){
+                    console.log("Erro:"+err.message)
+                    return res.status(500).json({Mensagem:"Erro interno do servidor"})
                 }
-                console.log(id_medico,id_usuario);
-                res.json({ notificacoes: result });
-            });
-        } catch (error) {
-            console.error('Erro ao decodificar o token do usuário:', error.message);
-            res.status(500).json({ erro: error.message });
-        }
+                return res.status(200).json({Notificações:result})
+            })
+        })
     },
-
     // Marca uma notificação como lida com base no id_notificacao fornecido e no accessToken fornecido
     marcarNotificacaoComoLida: async (req, res) => {
-        try {
-            const { accessToken, id_notificacoes } = req.body;
-            const id_medico = token.medicoId(accessToken);
-            const id_usuario = token.usuarioId(accessToken);
-            let status, estadoonline;
+        const {accessToken,id_notificacao} = req.body
+
+        const {email} = jwt.verify(accessToken, secretKey.secretKey);
+
+        const selectQuery='SELECT token FROM usuarios WHERE email = ?'
+
+        db.query(selectQuery,[email],async (err, result) => {
+
+            if(err){
+                console.log("Erro:"+err.message)
+                return res.status(500).json({Mensagem:"Erro interno do servidor"})
+            }
     
-            // Verifica se o token é válido e se pertence a um médico ou usuário
-            if (!id_medico && !id_usuario) {
-                return res.status(200).json({ erro: 'Token inválido' });
+            if(result[0].token!=accessToken){
+                return res.status(401).json({Mensagem:"Token inválido"})
             }
 
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
-            }
+            const selectQuery2 = "SELECT * FROM notificacoes where id_notificacao = ?";
+            db.query(selectQuery2,id_notificacao,(err,result)=>{
+                
+                if(err){
+                    console.log("Erro:"+err.message)
+                    return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                }
+
+                if (result.length === 0) {
+                    return res.status(404).json({ mensagem: 'Notificação não encontrada ou não autorizada para este usuário ou médico' });
+                }
+
+
+
+
+
+            })
+        })
+
            
             // Verifica se a notificação pertence ao usuário ou médico
             const obterNotificacaoQuery = 'SELECT * FROM notificacoes WHERE id_notificacoes = ?';
@@ -107,30 +98,23 @@ const notificacoesController = {
                     return res.status(500).json({ mensagem: 'Erro ao obter notificação', erro: err });
                 }
     
-                // Se a notificação não for encontrada ou não pertencer ao usuário ou médico, retorne erro
-                if (result.length === 0) {
-                    return res.status(404).json({ mensagem: 'Notificação não encontrada ou não autorizada para este usuário ou médico' });
-                }
-    
-                // Caso contrário, marque a notificação como lida
-                const estado = result[0].lido;
-                status = estado === 0 ? 1 : 0;
+                const estado = result[0].visualizado;
+                let status = estado === 0 ? 1 : 0;
                 estadoonline = estado === 0 ? "lido" : "Não lido";
     
-                const editarNotificacaoQuery = 'UPDATE notificacoes SET lido = ? WHERE id_notificacoes = ?';
-                db.query(editarNotificacaoQuery, [status, id_notificacoes], (err, result) => {
+                const editarNotificacaoQuery = 'UPDATE notificacoes SET lido = ? WHERE id_notificacao = ?';
+                db.query(editarNotificacaoQuery, [status, id_notificacao], (err, result) => {
                     if (err) {
                         return res.status(500).json({ mensagem: 'Erro ao editar Notificação', erro: err });
                     }
                     // Retorne a mensagem de sucesso e o novo estado da notificação
-                    res.json({ mensagem: 'Notificação marcada como lida com sucesso', Estado: estadoonline });
-                });
+                return res.json({ mensagem: 'Notificação marcada com sucesso', Estado: estadoonline });
+                
+            });
+                
             });
     
-        } catch (error) {
-            console.error('Erro ao decodificar o token:', error.message);
-            res.status(500).json({ erro: error.message });
-        }
+                                                                                           
     }
     
 };

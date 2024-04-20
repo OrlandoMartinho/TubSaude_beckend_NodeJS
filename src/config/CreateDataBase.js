@@ -57,7 +57,7 @@ function runQuery(connection, query) {
   return new Promise((resolve, reject) => {
     connection.query(query, (err, results) => {
       if (err) {
-        reject(err);
+        reject(err); 
         return;
       }
       resolve();
@@ -92,10 +92,19 @@ connection.connect(async (err) => {
 
     // Conectar ao banco de dados específico
     connection.changeUser({ database: dbConfig.database });
-    const senhaEncriptada = await bcrypt.hashSync(admCredenciais.senha, salt);
-    
+   
     // Definir as consultas CREATE TABLE para cada tabela
     const createTableQueries = [
+      `CREATE TABLE IF NOT EXISTS usuarios (
+          id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+          nome VARCHAR(45) DEFAULT NULL,
+          senha TEXT DEFAULT NULL,
+          email VARCHAR(45) DEFAULT NULL,
+          genero VARCHAR(45) DEFAULT NULL,
+          data_de_nascimento DATE DEFAULT NULL,
+          nome_de_usuario varchar(45) DEFAULT NULL,
+          token TEXT DEFAULT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
       `CREATE TABLE IF NOT EXISTS clinica (
           id_clinica INT AUTO_INCREMENT PRIMARY KEY,
           senha TEXT DEFAULT NULL,
@@ -148,54 +157,65 @@ connection.connect(async (err) => {
           conteudo VARCHAR(45) DEFAULT NULL,
           data_da_notificacao DATETIME DEFAULT current_timestamp(),
           visualizado INT DEFAULT 0
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
-    
-      `CREATE TABLE IF NOT EXISTS usuarios (
-          id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-          nome VARCHAR(45) DEFAULT NULL,
-          senha TEXT DEFAULT NULL,
-          email VARCHAR(45) DEFAULT NULL,
-          genero VARCHAR(45) DEFAULT NULL,
-          data_de_nascimento DATE DEFAULT NULL,
-          token TEXT DEFAULT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`
     ];
 
-    const deleteQuery = 'DELETE FROM usuarios WHERE email = ?';
-const insertQuery = 'INSERT INTO usuarios (email, senha) VALUES (?, ?)';
+    async function  adm(connection){
 
-connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
-    if (err) {
-        console.error('Erro ao excluir usuário:', err);
-        return;
-    }
-
-    // Se a exclusão for bem-sucedida, insira o novo usuário
-    connection.query(insertQuery, [admCredenciais.email, senhaEncriptada], (err, results) => {
-        if (err) {
-            console.error('Erro ao inserir usuário:', err);
-            return;
-        }
+      
+      const senhaEncriptada = await bcrypt.hashSync(admCredenciais.senha, salt);
+        
+      // Criar uma conexão com o banco de dados
+     
+      const deleteQuery = 'DELETE FROM usuarios WHERE email = ?';
+      const insertQuery = 'INSERT INTO usuarios (email, senha) VALUES (?, ?)';
   
-        console.log('Adm atualizado com sucesso.');
-    });
-});
- 
-
+      connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
+          if (err) {
+              console.error('Erro ao excluir usuário:', err.message);
+              return;
+          }
+  
+          // Se a exclusão for bem-sucedida, insira o novo usuário
+          connection.query(insertQuery, [admCredenciais.email, senhaEncriptada], (err, results) => {
+              if (err) {
+                  console.error('Erro ao inserir usuário:', err);
+                  return;
+              }
+        
+              console.log('Adm atualizado com sucesso.');
+          });
+      });
+  
+  
+  }
+   
+  const connection3 = mysql.createConnection({
+    host: dbConfig.host,
+    user: dbConfig.user,
+    password: dbConfig.password
+  });
+  connection3.changeUser({ database: dbConfig.database });
     // Verificar se cada tabela existe e criar somente as que não existem
     for (const query of createTableQueries) {
       const tableName = query.match(/CREATE TABLE IF NOT EXISTS (\S+)/)[1];
-      const tableExists = await checkIfTableExists(connection, tableName);
+      const tableExists = await checkIfTableExists(connection3, tableName);
       if (!tableExists) {
         await runQuery(connection, query);
-       
+        
       } else {
        
       }
     }
-
+    const connection2 = mysql.createConnection({
+      host: dbConfig.host,
+      user: dbConfig.user,
+      password: dbConfig.password
+    });
+    connection2.changeUser({ database: dbConfig.database });
+    adm(connection2)
     console.log('Processo de criação de tabelas concluído.');
-  } catch (error) {
+  } catch (error) { 
   console.log(error)
   } finally {
     // Fechar a conexão com o servidor MySQL
