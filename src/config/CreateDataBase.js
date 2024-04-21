@@ -129,8 +129,7 @@ connection.connect(async (err) => {
           id_contato INT AUTO_INCREMENT PRIMARY KEY,
           email VARCHAR(45) DEFAULT NULL,
           mensagem VARCHAR(45) DEFAULT NULL,
-          data_do_contato DATETIME DEFAULT current_timestamp(),
-          id_clinica INT NOT NULL
+          data_do_contato DATETIME DEFAULT current_timestamp()
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
       `CREATE TABLE IF NOT EXISTS conversas (
