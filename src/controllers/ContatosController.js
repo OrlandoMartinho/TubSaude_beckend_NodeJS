@@ -1,5 +1,6 @@
 const db = require('../config/dbConfig');
 const token = require('../utils/token');
+const notify = require('../controllers/NotificacoesController');
 
 const ContactosController = {
 
@@ -17,7 +18,8 @@ const ContactosController = {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
-
+            const notificacao = "Novo contacto recebido do email "+email;
+            notify.addNotificacao(notificacao);   
             res.status(200).json({ mensagem: 'Contacto adicionado com sucesso' });
         });
     },
