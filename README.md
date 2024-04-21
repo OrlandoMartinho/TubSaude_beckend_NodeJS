@@ -476,6 +476,60 @@ Aqui estão as rotas corrigidas:
   }
   ```
 
+## Rotas de Contatos
+
+Este arquivo descreve as rotas disponíveis para lidar com as operações relacionadas aos contatos no sistema.
+
+### 1. Cadastrar Contato
+
+- **Rota**: `POST /contatos/cadastrar`
+- **Descrição**: Permite cadastrar um novo contato.
+- **Corpo da Requisição**:
+  ```json
+  {
+   
+    "email": "Email do Contato",
+    "mensagem": "mensagem"
+  }
+  ```
+
+### 2. Listar Contatos
+
+- **Rota**: `POST /contatos/listar`
+- **Descrição**: Lista todos os contatos do sistema.
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "Token do ADM"
+  }
+  ```
+
+### 3. Obter Contato por ID
+
+- **Rota**: `POST /contatos/obterPorId`
+- **Descrição**: Obtém um contato específico por ID.
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "Token ADM",
+    "id_contato": "ID do Contato"
+  }
+  ```
+
+### 4. Eliminar Contato
+
+- **Rota**: `DELETE /contatos/eliminar/`
+- **Descrição**: Permite excluir um contato pelo seu ID.
+- **Corpo da Requisição**:
+```json
+  {
+    "accessToken": "Token ADM",
+    "id_contato": "ID do Contato"
+  }
+  ```
+---
+
+
   ## Conclusão
 
   Com isso, o README está completo, fornecendo uma visão geral do projeto, instruções de configuração e detalhes sobre cada rota disponível no backend do aplicativo TubSaude. Ele também inclui informações sobre as respostas comuns e a estrutura das requisições para cada rota. Se precisar de mais alguma coisa ou tiver alguma dúvida, estou à disposição para ajudar!
