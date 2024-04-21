@@ -11,7 +11,7 @@ router.post('/confirmar_consulta', consultasController.confirmarConsulta);
 // Rota para excluir uma consulta 
 router.delete('/', consultasController.eliminarConsultaPeloIdAcessToken);
 
-// Rota para obter todas consultas do medico
+// Rota para obter todas consultas do Administrador
 router.post('/todas_consultas', consultasController.obterTodasConsultaPeloTokenADM);
 
 //Rota para obter todas consultas do usuario
