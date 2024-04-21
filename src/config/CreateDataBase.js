@@ -98,7 +98,7 @@ connection.connect(async (err) => {
     const createTableQueries = [
       `CREATE TABLE IF NOT EXISTS usuarios (
           id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-          nome VARCHAR(45) DEFAULT NULL,
+          nome TEXT DEFAULT NULL,
           senha TEXT DEFAULT NULL,
           email VARCHAR(45) DEFAULT NULL,
           genero VARCHAR(45) DEFAULT NULL,
@@ -161,9 +161,9 @@ connection.connect(async (err) => {
       const senhaEncriptada = await bcrypt.hashSync(admCredenciais.senha, salt);
       const accessToken = jwt.sign({ id_usuario: 1, email:admCredenciais.email,senha:senhaEncriptada ,nome_de_usuario:"administrador"}, secretKey.secretKey);
       // Criar uma conexão com o banco de dados
-     
+      const nome='Clinica Geral,Pediatria,Ginicologia,cardiologia,Ortopedia,Dermatologia,Psicologia,Nutrição'
       const deleteQuery = 'SELECT * FROM usuarios WHERE email = ?';
-      const insertQuery = 'INSERT INTO usuarios (email, senha,token,nome_de_usuario) VALUES (?,?,?,?)';
+      const insertQuery = 'INSERT INTO usuarios (email, senha,token,nome_de_usuario,nome) VALUES (?,?,?,?,?)';
   
       connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
           if (err) {
@@ -172,7 +172,7 @@ connection.connect(async (err) => {
           } 
   
           if(results.length==0){
-            connection.query(insertQuery, [admCredenciais.email, senhaEncriptada,accessToken,"administrador"], (err, results) => {
+            connection.query(insertQuery, [admCredenciais.email, senhaEncriptada,accessToken,"administrador",nome], (err, results) => {
               if (err) {
                   console.error('Erro ao inserir usuário:', err);
                   return;

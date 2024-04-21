@@ -134,6 +134,52 @@ const ConsultasController = {
             }
         });
     }
+    ,obterEspecialidades:async (req,res)=>{
+
+
+        
+        const {accessToken}=req.body
+        const id_usuario=token.usuarioId(accessToken)
+       if(id_usuario!=1||!(await token.verificarTokenUsuario(accessToken)) ){
+            return res.status(401).json({ mensagem: 'Tokens inválidos' });
+        }
+
+        const selectQuery = 'SELECT nome FROM usuarios WHERE id_usuarios = ?';
+        db.query(selectQuery,[id_usuario],(err, result) => {
+            if (err) {
+                return res.status(500).json({ erro: "Erro ao obter consultas" });
+            }
+
+        
+              return  res.status(200).json({ Consultas: result[0].nome.split(",") });
+         
+        });
+
+
+    },
+    cadastrarEspecialidades:async (req,res)=>{
+
+
+        
+        const {accessToken,especialidade}=req.body
+        const id_usuario=token.usuarioId(accessToken)
+       if(id_usuario!=1||!(await token.verificarTokenUsuario(accessToken)) ){
+            return res.status(401).json({ mensagem: 'Tokens inválidos' });
+        }
+
+        const selectQuery = 'UPDATE usuarios SET nome = ? WHERE id_usuario = ?';
+        db.query(selectQuery,[,especialidade,id_usuario],(err, result) => {
+            if (err) {
+                return res.status(500).json({ erro: "Erro ao obter consultas" });
+            }
+
+        
+              return  res.status(200).json({ Consultas: result[0].nome.split(",") });
+         
+        });
+
+
+    }
 };
 
 module.exports = ConsultasController;
