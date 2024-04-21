@@ -3,7 +3,7 @@ const router = express.Router();
 const consultasController = require('../controllers/ConsultasControllers');
 
 // Rota para marcar uma consulta
-router.post('/', consultasController.cadastrarConsulta);
+router.post('/marcar', consultasController.cadastrarConsulta);
 
 // Rota para concluir uma consulta
 router.post('/confirmar_consulta', consultasController.confirmarConsulta);

@@ -106,13 +106,7 @@ connection.connect(async (err) => {
           nome_de_usuario varchar(45) DEFAULT NULL,
           token TEXT DEFAULT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
-      `CREATE TABLE IF NOT EXISTS clinica (
-          id_clinica INT AUTO_INCREMENT PRIMARY KEY,
-          senha TEXT DEFAULT NULL,
-          email VARCHAR(45) DEFAULT NULL,
-          token TEXT DEFAULT NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
-      
+
     `  CREATE TABLE IF NOT EXISTS codigos_verificacao (
         id_codigos_verificacao INT AUTO_INCREMENT PRIMARY KEY,
         codigo INT(4) DEFAULT NULL,
@@ -127,6 +121,7 @@ connection.connect(async (err) => {
           nome VARCHAR(45) DEFAULT NULL,
           email VARCHAR(45) DEFAULT NULL,
           status INT DEFAULT 0,
+          hora_da_consulta TIME DEFAULT NULL,
           id_usuario INT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
@@ -164,7 +159,7 @@ connection.connect(async (err) => {
       
       
       const senhaEncriptada = await bcrypt.hashSync(admCredenciais.senha, salt);
-      const accessToken = jwt.sign({ id_usuario: 1, email:admCredenciais.email,senha:senhaEncriptada }, secretKey.secretKey);
+      const accessToken = jwt.sign({ id_usuario: 1, email:admCredenciais.email,senha:senhaEncriptada ,nome_de_usuario:"administrador"}, secretKey.secretKey);
       // Criar uma conexão com o banco de dados
      
       const deleteQuery = 'SELECT * FROM usuarios WHERE email = ?';

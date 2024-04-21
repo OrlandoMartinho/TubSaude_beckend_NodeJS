@@ -2,6 +2,7 @@ const db = require('../config/dbConfig');
 const token = require('../utils/token');
 const notify = require('../controllers/NotificacoesController');
 const enviarEmail=require('../utils/notificarUsuarioNoEmail')
+const regexTime = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
 const ConsultasController = {
 
     cadastrarConsulta: async (req, res) => {
@@ -25,13 +26,13 @@ const ConsultasController = {
     // Método para adicionar um médico à consulta
     confirmarConsulta: async (req, res) => {
 
-        const {accessToken,id_consulta}=req.body
+        const {accessToken,id_consulta,hora_da_consulta}=req.body
         const id_usuario=token.usuarioId(accessToken)
        if(id_usuario!=1||!(await token.verificarTokenUsuario(accessToken)) ){
             return res.status(401).json({ mensagem: 'Tokens inválidos' });
         }
-
-            if(!id_consulta){
+        
+            if(!id_consulta||!regexTime.test(hora_da_consulta)){
                 res.status(400).json({ error: 'Complete bem os campos' });
                 return;
             }
@@ -53,14 +54,14 @@ const ConsultasController = {
             return res.status(404).json({ mensagem: 'Consulta não encontrada' });
         }
     
-        const updateConsulta = 'UPDATE Consultas SET status = ?  WHERE id_consulta = ?';
+        const updateConsulta = 'UPDATE Consultas SET status = ? ,hora_da_consulta = ? WHERE id_consulta = ?';
         const email=consultaExistente[0].email
-        db.query(updateConsulta, [1, id_consulta],async (err, result) => {
+        db.query(updateConsulta, [1, hora_da_consulta,id_consulta],async (err, result) => {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
              
-            const valor= await enviarEmail(email);
+            const valor= await enviarEmail(email,hora_da_consulta);
                 if(valor){
                     return res.status(200).json({ mensagem: 'Consulta aprovada com sucesso' });
                 }else{

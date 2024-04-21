@@ -261,6 +261,69 @@ const mensagensController = {
                         return res.status(400).json({ mensagem: 'Formato de arquivo inválido. Apenas arquivos PNG, JPG, JPEG, PDF, TXT, MP3, WAV, M4A, DOC e DOCX são permitidos' });
                     }
 
+                    if(id=!1){
+                        const selectQuery='SELECT id_usuario FROM consultas where id_usuario =?'
+                
+                        db.query(selectQuery,[id],(err,result)=>{
+                            if(err){
+                                console.log("Erro:"+err.message)
+                                return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                            }
+        
+                            if(userId==result[0].id_usuario){
+                        
+                                const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa, id_usuario) VALUES ( ?, ?)`;
+                                db.query(enviarMensagemQuery, [ id_conversa,id], (err, result) => {
+                                    if (err) {
+                                        console.error('Erro ao enviar a mensagem:', err.message);
+                                        res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
+                                        return;
+                                    }
+        
+                                    const id_mensagem = result.insertId;
+                                    const nomeAudio = `arquivo${id_conversa}${id_mensagem}${extensao}`;
+                                    const pathAudio = `./uploads/Menssager/${nomeAudio}`;
+                                    fs.writeFileSync(pathAudio, arquivo.buffer);
+                                    const conteudo = nomeAudio
+                                    const  queryUpdate=`UPDATE mensagens SET conteudo = ? WHERE id_mensagem = ?;`
+                                    db.query(queryUpdate, [conteudo, id_mensagem],(erro,resultado)=>{
+                                        if(erro){
+                                            console.log("Erro ao gravar arquivo na tabela")
+                                           return res.status(500).json({ERRO:erro})
+                                        }
+        
+        
+                                    console.log("Arquivo enviado com sucesso");
+                                    res.status(200).json({ message: 'Arquivo enviado com sucesso' });
+        
+                                    })
+                                   
+                                });
+
+                                   return res.status(200).json({ message: 'Mensagem enviada com sucesso' });
+                             
+                            }else{
+                                return res.status(400).json({ message: 'O usuario não tem permissão para enviar mensagem nesta conversa' });
+                                
+                            }
+        
+                        })
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa, id_usuario) VALUES ( ?, ?)`;
                         db.query(enviarMensagemQuery, [ id_conversa,id], (err, result) => {
                             if (err) {
@@ -278,7 +341,7 @@ const mensagensController = {
                             db.query(queryUpdate, [conteudo, id_mensagem],(erro,resultado)=>{
                                 if(erro){
                                     console.log("Erro ao gravar arquivo na tabela")
-                                    res.status(500).json({ERRO:erro})
+                                   return res.status(500).json({ERRO:erro})
                                 }
 
 

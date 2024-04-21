@@ -1,13 +1,18 @@
 const transporter = require('../config/emailConfig');
 const credenciais=require('../private/CredenciaisEmails.json')
 
-const enviarMensagem = async (destinatario) => {
+const enviarMensagem = async (destinatario,hora) => {
     try {// Opções de e-mail
+        const partes = hora.split(':');
+
+    // Remove os segundos
+    const tempoSemSegundos = partes.slice(0, 2).join(':');
+
     const mailOptions = {
         from: credenciais.email,
         to: destinatario, 
         subject: "Aprovação de consulta", // Assunto
-        html: `<h1 style="font-weight:normal;">A sua consulta foi aprovada aguardamos a sua chegada</h1>`
+        html: `<h1 style="font-weight:normal;">A sua consulta foi marcada para <strong>${tempoSemSegundos}</strong> ,aguardaremos a sua chegada</h1>`
     };
 
     

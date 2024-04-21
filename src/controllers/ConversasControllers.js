@@ -41,56 +41,52 @@ const conversasController = {
         try {
             const {  accessToken ,id_usuario} = req.body;
     
-
-            if (!accessToken || !id_usuario) {
+            
+            if (!accessToken) {
                 console.error('Erro ao obter IDs do usuário e do médico');
                 res.status(400).json({ error: 'Verifique bem os valores' });
                 return;
             }
 
-            let userId
-
-            if(await token.verificarTokenUsuario(accessToken)==true){
-               userId = token.usuarioId(accessToken);
-            }
-
-            if(id_usuario===token.usuarioId(accessToken)){
-
-                return res.status(400).json({ mensagem: 'Você não pode criar uma conversa com o mesmo usuário' });
-
-            }
 
             if( !(await token.verificarTokenUsuario(accessToken)) ){
                 return res.status(401).json({ mensagem: 'Token inválido' });
             }
 
-            var b
-            var nome_de_usuario;
+            let nome_de_usuario=token.usuarioNome(accessToken)
 
-            if(token.usuarioNome(accessToken)&&token.usuarioId(accessToken)!=1){
-              
-                nome_de_usuario=token.usuarioNome(accessToken)
-                criar(res,userId,nome_de_usuario)
-            }else{
-             console.log(id_usuario)
-            db.query("SELECT * FROM usuarios WHERE id_usuario = ?",[id_usuario],(err,result)=>{
+            if(nome_de_usuario === 'administrador' && !id_usuario){
 
-                    if(err){
-                        console.log("Erro:"+err.message)
-                        return res.status(500).json({Mensagem:"Erro interno do servidor"})
-                    }
-                   
-                        if(result.length===0){
-                            return res.status(404).json({Mensagem:"Usuario não encontrado"})
-                        }
-                        nome_de_usuario=result[0].nome_de_usuario
-                        criar(res,userId,nome_de_usuario)
-                    
-                })
+                return res.status(401).json({ mensagem: 'Forneça o id do usuario' });
+            
             }
 
-        
-    
+            const selectQuery='SELECT nome_de_usuario FROM usuarios WHERE id_usuario = ?'
+            db.query(selectQuery,[id_usuario],(err,results)=>{
+
+                if(err){
+                    console.error('Erro ao verificar a existência da conversa:', err.message);
+                    res.status(500).json({ error: 'Erro interno do servidor ao verificar a existência da conversa' });
+                    return;
+                }
+
+                nome_de_usuario =results[0].nome_de_usuario
+
+                let userId =id_usuario
+
+                if(nome_de_usuario==='administrador'){
+                    criar(res,userId,nome_de_usuario)
+                }else{
+                    userId = token.usuarioId(accessToken)
+                    criar(res,userId,nome_de_usuario)
+                }
+
+            })
+
+          
+           
+          
+
           
         } catch (error) {
             console.error('Erro ao decodificar o token do usuário:', error.message);

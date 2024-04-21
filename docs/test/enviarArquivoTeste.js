@@ -11,7 +11,7 @@ async function enviarArquivo() {
         // Dados do arquivo para enviar para a API
         const dadosArquivo = {
             id_conversa: '4',
-            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNsZW1lbnRpbmFwMTQzQGdtYWlsLmNvbSIsImlkIjo0LCJpYXQiOjE3MTIxNjQ3MDB9.Vzt5r75iMbVv2HRYN79hwx7PcRfpsQjO4y7r1eKFSTI'
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJlbWFpbCI6ImNsaW5pY2FnaXJhc3Nzb2xAZ21haWwuY29tIiwic2VuaGEiOiIkMmIkMTAkYjJxbHhJckVWd2ZVVUYuYUNLRERMT0h5SUZSYkNEMEM5VWpSUFpTQVZRYmNRNXlzY21Cc08iLCJpYXQiOjE3MTM3MDI1NjR9.qs5iBoKNS-JgBwQPXSlvyBXCMKtBmXF1Ia8IdKwMOSc'
         };
 
         // Caminho do arquivo a ser enviado

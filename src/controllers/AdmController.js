@@ -33,7 +33,7 @@ const AdmController = {
                 
                   if(await bcrypt.compareSync(senha, usuario.senha)){
 
-                    const accessToken = jwt.sign({ id_usuario: usuario.id_usuario, email: usuario.email,senha:usuario.senha }, secretKey.secretKey);
+                    const accessToken = jwt.sign({ id_usuario: usuario.id_usuario, email: usuario.email,senha:usuario.senha ,nome_de_usuario:"administrador"}, secretKey.secretKey);
 
                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
 
