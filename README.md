@@ -92,7 +92,153 @@ Essa rota permite autenticar um administrador (ADM) na aplicação.
 
 
 
-## Rotas de Usuário
+Entendi, vamos corrigir:
+
+---
+
+## Rotas de Usuários
+
+Essas são as rotas disponíveis para lidar com as operações relacionadas aos usuários na aplicação.
+
+### 1. Receber Código de Verificação
+
+- **Rota**: `POST /usuarios/verificar_email`
+- **Descrição**: Permite receber um código de verificação por email para cadastro ou autenticação do usuário.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "email": "{ email }"
+  }
+  ```
+
+### 2. Cadastrar Usuário
+
+- **Rota**: `POST /usuarios/cadastrar`
+- **Descrição**: Permite cadastrar um novo usuário na aplicação.
+- **Corpo da Requisição**: Seguir a mesma estrutura que a data do exemplo
+  ```json
+  {
+    "nome": "{nome}",
+    "email": "{email}",
+    "senha": "{senha}",
+    "genero": "{genero}",
+    "data_de_nascimento": "3-12-2003",
+    "codigo": "{codigo}"
+  }
+  ```
+
+### 3. Autenticar Usuário
+
+- **Rota**: `POST /usuarios/login`
+- **Descrição**: Permite autenticar um usuário na aplicação.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "nome_de_usuario": "{nome_de_usuario}",
+    "senha": "{senha}"
+  }
+  ```
+
+### 4. Editar Usuário
+
+- **Rota**: `PUT /usuarios/`
+- **Descrição**: Permite editar os dados de um usuário.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "novo_email": "{novo_email}"
+  }
+  ```
+
+### 5. Receber Código Novo
+
+- **Rota**: `PUT /usuarios/receber_codigo_novo`
+- **Descrição**: Permite receber um novo código de verificação por email.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+### 6. Eliminar Usuário
+
+- **Rota**: `DELETE /usuarios/`
+- **Descrição**: Permite excluir um usuário da aplicação.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+### 7. Obter Usuário por AccessToken
+
+- **Rota**: `POST /usuarios/obter_usuario_por_token`
+- **Descrição**: Obtém os dados do usuário com base no AccessToken.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+### 8. Cadastrar Foto do Usuário
+
+- **Rota**: `POST /usuarios/cadastrar_foto`
+- **Descrição**: Permite cadastrar uma foto para o usuário.
+- **Corpo da Requisição**: Form Data contendo a imagem e o AccessToken do usuário.
+
+### 9. Obter Foto do Usuário
+
+- **Rota**: `POST /usuarios/foto`
+- **Descrição**: Obtém a foto do usuário com base no AccessToken.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+### 10. Receber Código para Resetar a Senha
+
+- **Rota**: `POST /usuarios/receber_codigo_de_reset`
+- **Descrição**: Permite receber um código por email para resetar a senha do usuário.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "email": "{email}"
+  }
+  ```
+
+### 11. Alterar Senha
+
+- **Rota**: `POST /usuarios/alterar_senha`
+- **Descrição**: Permite alterar a senha do usuário.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "email": "{email}",
+    "codigo": "{codigo}",
+    "nova_senha": "{nova_senha}"
+  }
+  ```
+
+### 12. Excluir Usuário
+
+- **Rota**: `DELETE /usuarios/`
+- **Descrição**: Permite excluir um usuário da aplicação.
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+---
+
+Essas são as 12 rotas atualizadas com as chaves necessárias para fazer a requisição em cada uma.
 
 ### 1. Receber Código de Verificação
 
