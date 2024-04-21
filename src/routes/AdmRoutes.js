@@ -5,7 +5,7 @@ const admController = require('../controllers/AdmController');
 
 
 
-// Rota para obter os dados do ADM
+// Rota para altenticar ADM
 router.post('/', admController.autenticarAdm);
 
 

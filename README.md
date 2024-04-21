@@ -56,6 +56,42 @@ Todas as rotas são retornadas no formado `json`,e cada resposta contém um stat
 - **404**:O resurso não foi encontrado
 - **500**:Houve um erro dentro do servidor 
 
+
+Claro, aqui está o README atualizado para a rota de autenticação do ADM:
+
+---
+
+## Rota do Administrador
+
+Essa rota permite autenticar um administrador (ADM) na aplicação.
+
+### 1. Autenticar ADM
+
+- **Rota**: `POST /administrador`
+- **Descrição**: Permite autenticar um administrador (ADM) na aplicação.
+- **Corpo da Requisição**: JSON contendo o email e senha do ADM.
+- **Exemplo de Requisição**:
+  ```json
+  {
+    "email": "email_do_adm@example.com",
+    "senha": "senha_do_adm"
+  }
+  ```
+- **Resposta de Sucesso**:
+  - **Código**: 201
+  - **Conteúdo**: O token de acesso para o ADM autenticado.
+  ```json
+  {
+    "token": "..."
+  }
+  ```
+- **Resposta de Erro**:
+  - **Código**: 400
+  - **Conteúdo**: Mensagem de erro caso as credenciais estejam incorretas ou se ocorrer um erro no servidor.
+
+
+
+
 ## Rotas de Usuário
 
 ### 1. Receber Código de Verificação
