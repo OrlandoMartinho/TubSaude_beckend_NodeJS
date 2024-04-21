@@ -5,7 +5,7 @@ Bem-vindo ao TubSaude! Este é o repositório do backend do aplicativo TubSaude,
 
 ## Descrição
 
-Wakudila é um aplicativo projetado para facilitar consultas online entre profissionais e clientes. Este repositório contém o código-fonte do backend do Wakudila, que é construído em Node.js e utiliza o framework Express.js para criar APIs RESTful.
+TubSaude é um aplicativo projetado para facilitar consultas online entre profissionais e clientes. Este repositório contém o código-fonte do backend do TubSaude, que é construído em Node.js e utiliza o framework Express.js para criar APIs RESTful.
 
 ## Configuração
 
