@@ -1,7 +1,7 @@
 
-# Wakudila - Backend
+# TubSaude - Backend
 
-Bem-vindo ao Wakudila! Este é o repositório do backend do aplicativo Wakudila, uma plataforma de consultas online.
+Bem-vindo ao TubSaude! Este é o repositório do backend do aplicativo TubSaude, uma plataforma de consultas online.
 
 ## Descrição
 
