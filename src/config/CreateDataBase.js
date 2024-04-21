@@ -140,7 +140,7 @@ connection.connect(async (err) => {
       `CREATE TABLE IF NOT EXISTS conversas (
           id_conversa INT AUTO_INCREMENT PRIMARY KEY,
           id_usuario INT NOT NULL,
-          id_clinica INT NOT NULL
+          nome_de_usuario VARCHAR(45) DEFAULT null
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
       `CREATE TABLE IF NOT EXISTS mensagens (
@@ -148,7 +148,6 @@ connection.connect(async (err) => {
           conteudo VARCHAR(45) DEFAULT NULL,
           data_da_mensagem DATETIME DEFAULT current_timestamp(),
           id_usuario INT NOT NULL,
-          id_clinica INT NOT NULL,
           id_conversa INT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
@@ -167,8 +166,8 @@ connection.connect(async (err) => {
         
       // Criar uma conexão com o banco de dados
      
-      const deleteQuery = 'DELETE FROM usuarios WHERE email = ?';
-      const insertQuery = 'INSERT INTO usuarios (email, senha) VALUES (?, ?)';
+      const deleteQuery = 'SELECT * FROM usuarios WHERE email = ?';
+      const insertQuery = 'INSERT INTO usuarios (id_usuario,email, senha) VALUES (?,?, ?)';
   
       connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
           if (err) {
@@ -176,15 +175,17 @@ connection.connect(async (err) => {
               return;
           }
   
-          // Se a exclusão for bem-sucedida, insira o novo usuário
-          connection.query(insertQuery, [admCredenciais.email, senhaEncriptada], (err, results) => {
+          if(results.length==0){
+            connection.query(insertQuery, [0,admCredenciais.email, senhaEncriptada], (err, results) => {
               if (err) {
                   console.error('Erro ao inserir usuário:', err);
                   return;
               }
-        
+                                                     
               console.log('Adm atualizado com sucesso.');
           });
+          }
+          
       });
   
   

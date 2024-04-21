@@ -56,8 +56,8 @@ const token = {
     usuarioEmail: (accessToken) => {
         try {
             const decodedToken = jwt.verify(accessToken, secretKey.secretKey);
-            if (decodedToken && decodedToken.user && decodedToken.user.id) {
-                return decodedToken.user.email;
+            if (decodedToken) {
+                return decodedToken.email;
             } else {
                 return null;
             }

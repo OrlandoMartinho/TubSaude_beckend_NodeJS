@@ -3,7 +3,11 @@ const data = require('../utils/converterData');
 const token = require('../utils/token');
 const multer=require('multer')
 const path=require('path')
+const notify = require('../controllers/NotificacoesController');
 const fs=require('fs')
+const secretKey=require('../private/secretKey.json');
+const jwt = require('jsonwebtoken');
+const credenciaisAdm=require('../private/CredenciaisADM.json')
 // Configuração completa do multer
 const upload = multer({
     limits: { fileSize: 1 * 1024 * 1024 }, // Define o limite de tamanho do arquivo para 1MB
@@ -21,25 +25,26 @@ const mensagensController = {
     // Enviar uma nova mensagem em uma conversa
     enviarMensagem: async (req, res) => {
         try {
-            const { accessToken, id_conversa, conteudo } = req.body;
-    
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-    
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(200).json({ error: 'Erro ao enviar mensagem: ID do usuário ou médico não encontrado' });
-                return;
+            const { accessToken, id_conversa, conteudo ,} = req.body;
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+
+            if(!conteudo){
+                return res.status(400).json({ mensagem: 'Dados incompletos' });
             }
     
-            const id = userId || doctorId;
-    
-            const date = data.toString();
-            const enviarMensagemQuery = `INSERT INTO mensagens (conteudo, id_conversa, id_usuario, id_medico) VALUES (?, ?, ?, ?)`;
-            db.query(enviarMensagemQuery, [conteudo,  id_conversa, userId, doctorId], (err, result) => {
+            const userId =token.usuarioId(accessToken)
+
+            if(await token.verificarTokenUsuario(accessToken)){
+                const notificacao = email+" Enviou uma mensagem nova ";
+                notify.addNotificacao(notificacao); 
+            }
+            const enviarMensagemQuery = `INSERT INTO mensagens (conteudo, id_conversa,id_usuario) VALUES (?, ?, ?)`;
+            db.query(enviarMensagemQuery, [conteudo,  id_conversa, userId], (err, result) => {
                 if (err) {
                     console.error('Erro ao enviar a mensagem:', err.message);
                     res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
@@ -57,22 +62,13 @@ const mensagensController = {
     // Listar mensagens de uma conversa de um usuário ou médico em ordem de envio
     listarMensagens:async (req, res) => {
         try {
-            const { accessToken, id_conversa } = req.body;
-    
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-    
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(200).json({ error: 'Erro ao listar mensagens: ID do usuário ou médico não encontrado' });
-                return;
+            const { accessToken, id_conversa} = req.body;
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
-
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
-            }
-    
-            const id = userId || doctorId;
     
             const listarMensagensQuery = `
                 SELECT * FROM mensagens where id_conversa=${id_conversa} 
@@ -95,26 +91,17 @@ const mensagensController = {
     // Excluir uma mensagem em uma conversa
     excluirMensagem:async (req, res) => {
         try {
-            const { accessToken, id_mensagem } = req.body;
-    
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-    
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(200).json({ error: 'Erro ao excluir mensagem: ID do usuário ou médico não encontrado' });
-                return;
-            }
-    
-            const id = userId || doctorId;
-    
-            if( !(await token.verificarTokenUsuario(accessTokenUser)) || !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+            const { accessToken, id_mensagem} = req.body;
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
 
+          const id=token.usuarioId(accessToken)
 
-
-            const verificarMensagemQuery = `SELECT id_usuario, id_medico FROM mensagens WHERE id_mensagem = ?`;
+            const verificarMensagemQuery = `SELECT id_usuario FROM mensagens WHERE id_mensagem = ?`;
             db.query(verificarMensagemQuery, [id_mensagem], (err, result) => {
                 if (err) {
                     console.error('Erro ao verificar a mensagem:', err.message);
@@ -129,8 +116,9 @@ const mensagensController = {
                 }
     
                 const mensagem = result[0];
-                if (mensagem.id_usuario !== id && mensagem.id_medico !== id) {
-                    console.error('Usuário ou médico não tem permissão para excluir esta mensagem');
+                console.log(mensagem)
+                if (mensagem.id_usuario !== id ) {
+                    console.error('Usuário  não tem permissão para excluir esta mensagem');
                     res.status(403).json({ error: 'Usuário ou médico não tem permissão para excluir esta mensagem' });
                     return;
                 }
@@ -155,22 +143,21 @@ const mensagensController = {
     // Editar o conteúdo de uma mensagem em uma conversa
     editarMensagem:async (req, res) => {
         try {
-            const { accessToken, id_mensagem, novoConteudo } = req.body;
-    
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-    
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(200).json({ error: 'Erro ao editar mensagem: ID do usuário ou médico não encontrado' });
-                return;
+            const { accessToken, id_mensagem,novoConteudo} = req.body;
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
-    
-            const id = userId || doctorId;
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+
+            if(!novoConteudo){
+                return res.status(400).json({ mensagem: 'Campos incompletos' });
             }
-            const verificarMensagemQuery = `SELECT id_usuario, id_medico FROM mensagens WHERE id_mensagem = ?`;
+
+          const id=token.usuarioId(accessToken)
+
+            const verificarMensagemQuery = `SELECT id_usuario FROM mensagens WHERE id_mensagem = ?`;
             db.query(verificarMensagemQuery, [id_mensagem], (err, result) => {
                 if (err) {
                     console.error('Erro ao verificar a mensagem:', err.message);
@@ -185,7 +172,7 @@ const mensagensController = {
                 }
     
                 const mensagem = result[0];
-                if (mensagem.id_usuario !== id && mensagem.id_medico !== id) {
+                if (mensagem.id_usuario !== id) {
                     console.error('Usuário ou médico não tem permissão para editar esta mensagem');
                     res.status(403).json({ error: 'Usuário ou médico não tem permissão para editar esta mensagem' });
                     return;
@@ -216,38 +203,37 @@ const mensagensController = {
                         return res.status(500).send('Erro ao fazer upload da audio');
                     }
                     const { accessToken, id_conversa} = req.body;
-                    console.log(accessToken)
-                    const userId = token.usuarioId(accessToken);
-                    const doctorId = token.medicoId(accessToken);
-            
-                    if (!userId && !doctorId) {
-                        console.error('Erro ao obter ID do usuário ou médico');
-                        res.status(200).json({ error: 'Erro ao enviar mensagem: ID do usuário ou médico não encontrado' });
-                        return;
+                    const email= token.usuarioEmail(accessToken);
+                    const validarAdm=email===credenciaisAdm.email
+                    
+                    if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                        return res.status(401).json({ mensagem: 'Tokens inválidos' });
                     }
-                    if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                        return res.status(200).json({ mensagem: 'Tokens inválidos' });
-                    }
+        
+        
+                    const id=token.usuarioId(accessToken)
             
-                    const audio = req.file;
-                    if (!audio) {
-                        console.log({ mensagem: 'Nenhuma audio foi enviada' })
-                        return res.status(200).json({ mensagem: 'Nenhuma audio foi enviada' });
+        
+            
+                    const arquivo = req.file;
+                    if (!arquivo) {
+                        console.log({ mensagem: 'Nenhum arquivo foi enviado' })
+                        return res.status(400).json({ mensagem: 'Nenhuma audio foi enviada' });
+                    }
+
+                    if (!id_conversa) {
+                        return res.status(400).json({ mensagem: 'Valores incompletos' });
                     }
                     
                     // Verifica a extensão do arquivo
-                    const extensao = path.extname(req.file.originalname).toLowerCase();
+                    const extensao = path.extname(arquivo.originalname).toLowerCase();
                     console.log(extensao)
                     if (!['.png', '.jpg', '.jpeg', '.pdf', '.txt', '.mp3', '.wav', '.m4a', '.doc', '.docx'].includes(extensao)) {
                         return res.status(400).json({ mensagem: 'Formato de arquivo inválido. Apenas arquivos PNG, JPG, JPEG, PDF, TXT, MP3, WAV, M4A, DOC e DOCX são permitidos' });
                     }
 
-                       
-
-
-                        const date = data.toString();
-                        const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa, id_usuario, id_medico) VALUES ( ?, ?, ?)`;
-                        db.query(enviarMensagemQuery, [ id_conversa, userId, doctorId], (err, result) => {
+                        const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa, id_usuario) VALUES ( ?, ?)`;
+                        db.query(enviarMensagemQuery, [ id_conversa,id], (err, result) => {
                             if (err) {
                                 console.error('Erro ao enviar a mensagem:', err.message);
                                 res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
@@ -257,7 +243,7 @@ const mensagensController = {
                             const id_mensagem = result.insertId;
                             const nomeAudio = `arquivo${id_conversa}${id_mensagem}${extensao}`;
                             const pathAudio = `./uploads/Menssager/${nomeAudio}`;
-                            fs.writeFileSync(pathAudio, audio.buffer);
+                            fs.writeFileSync(pathAudio, arquivo.buffer);
                             const conteudo = nomeAudio
                             const  queryUpdate=`UPDATE mensagens SET conteudo = ? WHERE id_mensagem = ?;`
                             db.query(queryUpdate, [conteudo, id_mensagem],(erro,resultado)=>{
@@ -289,18 +275,12 @@ const mensagensController = {
             const { nomeDoArquivo } = req.params;
             console.log(nomeDoArquivo)
             // Verifica se o usuário ou médico está autenticado
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                return res.status(400).json({ error: 'Erro ao retornar arquivo: ID do usuário ou médico não encontrado' });
-            }
-    
-            // Verifica se o token é válido
-            if (!(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))) {
-                return res.status(401).json({ mensagem: 'Token inválido' });
-            }
-    
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
+            }    
             // Verifica se o arquivo existe
             const caminhoArquivo = path.join(__dirname,'../','../','uploads','Menssager', nomeDoArquivo);
             if (!fs.existsSync(caminhoArquivo)) {
@@ -322,19 +302,12 @@ const mensagensController = {
             const { accessToken } = req.body;
             const { nomeArquivo } = req.params;
     
-            // Verifica se o usuário ou médico está autenticado
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                return res.status(400).json({ error: 'Erro ao excluir arquivo: ID do usuário ou médico não encontrado' });
+            const email= token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            
+            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
-    
-            // Verifica se o token é válido
-            if (!(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))) {
-                return res.status(401).json({ mensagem: 'Token inválido' });
-            }
-    
             // Verifica se o arquivo existe
             const caminhoArquivo = path.join(__dirname, 'uploads', 'Menssager', nomeArquivo);
             if (!fs.existsSync(caminhoArquivo)) {

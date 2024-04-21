@@ -1,57 +1,93 @@
 const db = require('../config/dbConfig');
 const jwt = require('jsonwebtoken');
 const secretKey = require('../private/secretKey.json');
-const data = require('../utils/converterData');
+const credenciaisAdm=require('../private/CredenciaisADM.json')
 const token = require('../utils/token');
 
+
+
+function criar(res,userId,nome_de_usuario)
+{
+      // Verificar se já existe uma conversa entre o usuário e o médico
+      const verificarConversaQuery = `SELECT * FROM conversas WHERE id_usuario = ? `;
+      db.query(verificarConversaQuery, [userId], (err, result) => {
+          if (err) {
+              console.error('Erro ao verificar a existência da conversa:', err.message);
+              res.status(500).json({ error: 'Erro interno do servidor ao verificar a existência da conversa' });
+              return;
+          }
+          
+          if (result.length > 0) {
+              res.status(400).json({ message: 'Já existe uma conversa com este usuário  com o id',id:result[0].id_conversa });
+          } else {
+              // Criar uma nova conversa
+              const criarConversaQuery = `INSERT INTO conversas (id_usuario,nome_de_usuario) VALUES (?,?)`;
+              db.query(criarConversaQuery, [userId,nome_de_usuario], (err, result) => {
+                  if (err) {
+                      console.error('Erro ao criar a conversa:', err.message);
+                      res.status(500).json({ error: 'Erro interno do servidor ao criar conversa' });
+                      return;
+                  }
+                  const conversaId = result.insertId;
+                  console.log('Nova conversa criada com sucesso');
+                  res.status(201).json({ message: 'Conversa criada com sucesso',"Id da conversa": conversaId });
+              });
+          }
+      });
+}
 const conversasController = {
-    // Criar uma nova conversa entre dois usuários ou médicos
-    // Criar uma nova conversa entre um médico e um usuário
+   
     criarConversa:async (req, res) => {
         try {
-            const { accessTokenDoctor, accessToken } = req.body;
+            const {  accessToken ,id_usuario} = req.body;
     
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessTokenDoctor)
-    
-            if (!userId || !doctorId) {
+            
+            const email = token.usuarioEmail(accessToken);
+            const validarAdm=email===credenciaisAdm.email
+            if (validarAdm ==false && !id_usuario) {
                 console.error('Erro ao obter IDs do usuário e do médico');
-                res.status(200).json({ error: 'Erro ao criar conversa: IDs de usuário e médico não encontrados' });
+                res.status(400).json({ error: 'Verifique bem os valores' });
                 return;
             }
 
-            if( !(await token.verificarTokenUsuario(accessToken)) || !(await token.verificarTokenMedico(accessTokenDoctor))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+            let userId
+
+            if(await token.verificarTokenUsuario(accessToken)==true){
+               userId = token.usuarioId(accessToken);
+            }else if(await token.verificarTokenUsuario(accessToken)==false){ 
+               userId=id_usuario
             }
+
+            if( !(await token.verificarTokenUsuario(accessToken)) && validarAdm == false){
+                return res.status(401).json({ mensagem: 'Token inválido' });
+            }
+
+            var b
+            var nome_de_usuario;
+
+            if(token.usuarioNome(accessToken)){
+              
+                nome_de_usuario=token.usuarioNome(accessToken)
+                criar(res,userId,nome_de_usuario)
+            }else{
+             
+            db.query("SELECT * FROM usuarios WHERE id_usuario = ?",[id_usuario],(err,result)=>{
+
+                    if(err){
+                        console.log("Erro:"+err.message)
+                        return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                    }
+                   
+                   
+                        nome_de_usuario=result[0].nome_de_usuario
+                        criar(res,userId,nome_de_usuario)
+                    
+                })
+            }
+
+        
     
-            // Verificar se já existe uma conversa entre o usuário e o médico
-            const verificarConversaQuery = `SELECT id_conversa FROM conversas WHERE (id_usuario = ? AND id_medico = ?) OR (id_usuario = ? AND id_medico = ?)`;
-            db.query(verificarConversaQuery, [userId, doctorId, doctorId, userId], (err, result) => {
-                if (err) {
-                    console.error('Erro ao verificar a existência da conversa:', err.message);
-                    res.status(500).json({ error: 'Erro interno do servidor ao verificar a existência da conversa' });
-                    return;
-                }
-                
-                if (result.length > 0) {
-                    // Já existe uma conversa entre o usuário e o médico
-                    console.log('Já existe uma conversa entre o usuário e o médico');
-                    res.status(200).json({ message: 'Já existe uma conversa entre o usuário e o médico' });
-                } else {
-                    // Criar uma nova conversa
-                    const criarConversaQuery = `INSERT INTO conversas (id_usuario, id_medico) VALUES (?, ?)`;
-                    db.query(criarConversaQuery, [userId, doctorId], (err, result) => {
-                        if (err) {
-                            console.error('Erro ao criar a conversa:', err.message);
-                            res.status(500).json({ error: 'Erro interno do servidor ao criar conversa' });
-                            return;
-                        }
-                        const conversaId = result.insertId;
-                        console.log('Nova conversa criada com sucesso');
-                        res.status(200).json({ message: 'Conversa criada com sucesso', conversaId });
-                    });
-                }
-            });
+          
         } catch (error) {
             console.error('Erro ao decodificar o token do usuário:', error.message);
             res.status(500).json({ error: 'Erro interno do servidor ao criar conversa' });
@@ -60,75 +96,77 @@ const conversasController = {
     , // Listar conversas de um usuário ou médico
     listarConversas:async (req, res) => {
         try {
-            const { accessToken } = req.body;
-            const userId = token.usuarioId(accessToken);
-            const doctorId = token.medicoId(accessToken);
+            const {accessToken} = req.body
 
-            if (!userId && !doctorId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(200).json({ error: 'Erro ao listar conversas: ID do usuário ou médico não encontrado' });
-                return;
-            }
-
-            if( !(await token.verificarTokenUsuario(accessToken)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
-            }
-
-            const id = userId || doctorId;
-
-            let listarConversasQuery = '';
-            if (userId) {
-                // Se o token for do usuário, listar conversas com médicos
-                listarConversasQuery = `
-                    SELECT * FROM conversas where id_usuario=${userId}
-                `;
-            } else {
-                // Se o token for do médico, listar conversas com usuários
-                listarConversasQuery = `
-                SELECT * FROM conversas where id_usuario=${doctorId}
-                `;
-            }
-
-            db.query(listarConversasQuery, [id], (err, result) => {
-                if (err) {
-                    console.error('Erro ao listar conversas:', err.message);
-                    res.status(500).json({ error: 'Erro interno do servidor ao listar conversas' });
-                    return;
+            const {email} = jwt.verify(accessToken, secretKey.secretKey);
+    
+            const selectQuery='SELECT * FROM usuarios WHERE email = ?'
+    
+            db.query(selectQuery,[email],async (err, result) => {
+    
+                if(err){
+                    console.log("Erro:"+err.message)
+                    return res.status(500).json({Mensagem:"Erro interno do servidor"})
                 }
-                res.status(200).json({ conversas: result });
-            });
+                if(result.length===0){
+                    return res.status(401).json({Mensagem:"Token inválido"})
+                }
+        
+                if(result[0].token!=accessToken){
+                    return res.status(401).json({Mensagem:"Token inválido"})
+                }
+    
+                const selectQuery2 = "SELECT * FROM conversas";
+                db.query(selectQuery2,(erro,results)=>{
+                    
+                    if(erro){
+                        console.log("Erro:"+err.message)
+                        return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                    }
+                    return res.status(200).json({Conversas:results})
+                })
+            })
         } catch (error) {
             console.error('Erro ao decodificar o token do usuário ou médico:', error.message);
             res.status(500).json({ error: 'Erro interno do servidor ao listar conversas' });
         }
     },
     eliminarConversa: async (req, res) => {
+
         try {
-            const { accessToken, conversaId } = req.body;
+            const {accessToken,id_conversa} = req.body
 
-            const userId = token.usuarioId(accessToken);
-            const medicoId = token.medicoId(accessToken);
-
-            if (!userId && !medicoId) {
-                console.error('Erro ao obter ID do usuário ou médico');
-                res.status(400).json({ error: 'Erro ao obter ID do usuário ou médico do token' });
-                return;
+            if(!accessToken||!id_conversa){
+                return res.status(400).json({Mensagem:"Complete bem os campos"})
             }
 
-            if( !(await token.verificarTokenUsuario(accessTokenUser)) && !(await token.verificarTokenMedico(accessToken))){
-                return res.status(200).json({ mensagem: 'Tokens inválidos' });
+            const id_usuario =token.usuarioId(accessToken)
+            const email_user =token.usuarioEmail(accessToken)
+
+            const {email} = jwt.verify(accessToken, secretKey.secretKey);
+            if(!email||!email_user){
+
             }
-
-            let id;
-
-            if (userId) {
-                id = userId;
-            } else {
-                id = medicoId;
-            }
-
-            const verificarConversaQuery = `SELECT id_conversa FROM conversas WHERE id_conversa = ? AND (id_usuario = ? OR id_medico = ?)`;
-            db.query(verificarConversaQuery, [conversaId, id, id], (err, result) => {
+            const selectQuery='SELECT * FROM usuarios WHERE email = ? OR email = ?'
+    
+            db.query(selectQuery,[email,email_user],async (err, result) => {
+    
+                if(err){
+                    console.log("Erro:"+err.message)
+                    return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                }
+                console.log(email_user)
+        
+                if(result.length===0 && !await token.verificarTokenUsuario(accessToken)){
+                    return res.status(401).json({Mensagem:"Token inválido"})
+                }
+        
+                if(result[0].token!=accessToken && !await token.verificarTokenUsuario(accessToken)){
+                    return res.status(401).json({Mensagem:"Token inválido"})
+                }
+    
+            const verificarConversaQuery = `SELECT * FROM conversas WHERE id_conversa = ? OR id_usuario = ? `;
+            db.query(verificarConversaQuery, [id_conversa,id_usuario], (err, result) => {
                 if (err) {
                     console.error('Erro ao verificar a conversa:', err.message);
                     res.status(500).json({ error: 'Erro interno do servidor ao verificar a conversa' });
@@ -136,13 +174,13 @@ const conversasController = {
                 }
 
                 if (result.length === 0) {
-                    console.error('Conversa não encontrada ou não relacionada ao usuário ou médico');
-                    res.status(404).json({ error: 'Conversa não encontrada ou não relacionada ao usuário ou médico' });
+                    console.error('Conversa não encontrada ');
+                    res.status(404).json({ error: 'Conversa não encontrada ou não relacionada ao usuário' });
                     return;
                 }
 
                 const eliminarConversaQuery = `DELETE FROM conversas WHERE id_conversa = ?`;
-                db.query(eliminarConversaQuery, [conversaId], (err, result) => {
+                db.query(eliminarConversaQuery, [id_conversa], (err, result) => {
                     if (err) {
                         console.error('Erro ao eliminar conversa:', err.message);
                         res.status(500).json({ error: 'Erro interno do servidor ao eliminar conversa' });
@@ -153,10 +191,14 @@ const conversasController = {
                     res.status(200).json({ message: 'Conversa eliminada com sucesso' });
                 });
             });
+            })
         } catch (error) {
-            console.error('Erro ao decodificar o token do usuário ou médico:', error.message);
-            res.status(500).json({ error: 'Erro interno do servidor ao eliminar conversa' });
+            console.error('Erro ao eliminar conversa:', error.message);
+            res.status(500).json({ error: 'Erro interno do servidor' });
         }
+
+
+      
     }
 
 

@@ -142,7 +142,7 @@ const UsersController = {
                                     return res.status(500).json({Mensagem:"Erro interno do servidor  4"})
                                 }
                             //Notificando o usuário
-                            const notificacao = "O "+email+"Cadastrou-se na TubSaude";
+                            const notificacao = "O "+email+" Cadastrou-se na TubSaude";
                             notify.addNotificacao(notificacao);                         
                             return res.status(201).json({ Mensagem: "Usuário cadastrado com sucesso",nome_de_usuario:nome_de_usuario});
 
@@ -201,7 +201,7 @@ const UsersController = {
                     } else {
                     // Gerar token JWT para o usuário autenticado
                     const accessToken = jwt.sign({ id_usuario: usuario.id_usuario,email:usuario.email, nome_de_usuario: usuario.nome_de_usuario,senha:usuario.senha }, secretKey.secretKey);
-                    
+                     
                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
 
                     // Parâmetros para a consulta SQL
@@ -349,7 +349,7 @@ const UsersController = {
                             }else{
                 
                 
-                                   const accessToken2 = jwt.sign({ id: token.usuarioId(accessToken), email:token.usuarioEmail(accessToken),senha:token.usuarioSenha(accessToken) }, secretKey.secretKey);
+                                   const accessToken2 = jwt.sign({ id_usuario: token.usuarioId(accessToken), email:token.usuarioEmail(accessToken),senha:token.usuarioSenha(accessToken) },token.usuarioNome(accessToken), secretKey.secretKey);
                                     
                                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
                 
@@ -586,7 +586,7 @@ const UsersController = {
         });
     }
     ,
-    receberCodigoParaConfirmacao:async (req,res)=>{
+    receberCodigoParaResetarSenha:async (req,res)=>{
 
         const {email} = req.body;
             // Verifica se o email já está em uso
@@ -598,27 +598,144 @@ const UsersController = {
                     return res.status(500).json({Mensagem:"Erro interno no servidor"})
                 }
             
-                if (!result.length > 0) {
+                if (result.length===0) {
                     return res.status(403).json({ mensagem: 'Email não existe esse email no  sistema' });
-                }else{
+                }
                   // Gera um novo código de verificação e insere na base de dados
-                 const codigoDeVerificacao = gerarCodigoDeVerificacao();
-                 const insertCodeQuery = 'INSERT INTO codigos_verificacao (email, codigo, utilizado) VALUES (?, ?, ?)';
-                 await db.query(insertCodeQuery, [email, codigoDeVerificacao, 0]);
-    
-                  // Envia email de verificação
-                const valor= await enviarEmail(email, codigoDeVerificacao,res);
-                if(valor){
-                    return res.status(200).json({ mensagem: 'Email de verificação enviado com sucesso' });
-                }else{
+                const codigoDeVerificacao = gerarCodigoDeVerificacao();
+                const insertCodeQuery = 'INSERT INTO codigos_verificacao (email, codigo, utilizado) VALUES (?, ?, ?)';
+                db.query(insertCodeQuery, [email, codigoDeVerificacao, 0],async (erro,results)=>{
 
-                    return res.status(400).json({ mensagem: 'Verifique a sua internet ou seu email não está disponível' });
+                    if(erro){
+                        console.log("Erro:"+erro.message)
+                        return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                    }
+
+                    const valor= await enviarEmail(email, codigoDeVerificacao,res);
+                    if(valor){
+    
+                        return res.status(200).json({ mensagem: 'Email de verificação enviado com sucesso' });
+                    
+                    }else{
+    
+                        return res.status(400).json({ mensagem: 'Verifique a sua internet ou seu email não está disponível' });
+                    
+                    }
+
+                });
+    
+              
+             
                 
-                }
-                }
            })
         
+    },
+    resetarSenha:async (req,res)=>{
+        const {email,codigo,nova_senha}=req.body
+
+        if(!email||!codigo||!nova_senha){
+
+            res.status(400).json({Mensagem:"Campos incompletos"})
+
+        }
+
+        const selectCodeQuery = 'SELECT * FROM codigos_verificacao WHERE email = ? AND codigo = ? AND utilizado = 0';
+        db.query(selectCodeQuery, [email, codigo], async (err, results) => {
+            if (err) {
+                console.log("Erro :"+err.message)
+                return res.status(500).json({ mensagem: 'Erro interno do servidor'});
+             }
+            if (results.length === 0) {
+                return res.status(400).json({ mensagem: 'Código de verificação inválido ou já utilizado' });
+            }
+            // Marca o código de verificação como utilizado
+            const updateCodeQuery = 'UPDATE codigos_verificacao SET utilizado = 1 WHERE email = ? AND codigo = ?';
+            db.query(updateCodeQuery, [email, codigo],async (err) => {
+                if (err) {
+                    console.log("Erro :"+err.message)
+                    return res.status(500).json({ mensagem: 'Erro interno do servidor'});
+                }
+
+                    try {
+                        // Encriptar a senha com `bcrypt`
+                
+                        const senhaEncriptada = await bcrypt.hashSync(nova_senha, salt);
+                        // Inserir o novo usuário na tabela `usuarios`
+
+                        const selectQueryS ='SELECT * FROM usuarios WHERE email = ?'
+
+                        db.query(selectQueryS,[email],(erro,resultado)=>{
+
+                            if(erro){
+                                console.log("Erro:"+erro.message)
+                                return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                            }
+
+                            if(resultado.length===0){
+
+                                return res.status(400).json({ Mensagem: "Email não existe no sistema" });
+
+                            }
+
+
+                            const updateQuery = 'UPDATE usuarios SET senha=? WHERE email = ?';
+                        db.query(updateQuery,[senhaEncriptada, email],(err,result)=>{
+                
+                            if(err){
+                                console.log("Erro:"+err)
+                            }
+                
+                           
+                                    const usuario = resultado[0] 
+                
+                                    const accessToken2 = jwt.sign({ id_usuario:usuario.id_usuario, email:usuario.email,senha:usuario.senha,nome_de_usuario:usuario.nome_de_usuario }, secretKey.secretKey);
+                                    
+                                    const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
+                
+                                    // Parâmetros para a consulta SQL
+                                    const params = [accessToken2, usuario.id_usuario];
+                                
+                                    // Executar a consulta SQL
+                                    db.query(updateQuery, params, (err, result) => {
+                                        if (err) {
+                                            console.error('Erro ao atualizar usuário:', err);
+                                            return res.status(500).json({ Mensagem: "Erro interno do servidor" });   
+                                        }
+                
+                                        return res.status(201).json({ Mensagem: "Senha resetada com sucesso", Novo_token:accessToken2 });   
+                
+                                    
+                                    });
+                
+                
+                
+                            
+                
+                
+                        })
+                        
+
+
+                        })
+
+                        
+
+                 
+                    } catch (err) {
+                        console.error({ Erro: err });
+                        return res.status(500).json({ Mensagem: "Erro interno do servidor", erro: err });
+                    }
+
+                })
+            
+                    })
+                    
     }
+
+
+
+
+
 
     }
 

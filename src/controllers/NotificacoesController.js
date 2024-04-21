@@ -23,13 +23,12 @@ const notificacoesController = {
     // Obtém todas as notificações de um médico ou usuário com base no accessToken fornecido
     obterTodasNotificacoes: async (req, res) => {
 
-
         const {accessToken} = req.body
 
-        const {email} = jwt.verify(accessToken, secretKey.secretKey);
+        const email = token.usuarioEmail(accessToken)
 
         const selectQuery='SELECT token FROM usuarios WHERE email = ?'
-
+      
         db.query(selectQuery,[email],async (err, result) => {
 
             if(err){
@@ -48,7 +47,7 @@ const notificacoesController = {
                     console.log("Erro:"+err.message)
                     return res.status(500).json({Mensagem:"Erro interno do servidor"})
                 }
-                return res.status(200).json({Notificações:result})
+                return res.status(200).json({Notificacoes:result})
             })
         })
     },

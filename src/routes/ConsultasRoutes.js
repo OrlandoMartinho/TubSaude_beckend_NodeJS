@@ -6,13 +6,13 @@ const consultasController = require('../controllers/ConsultasControllers');
 router.post('/', consultasController.cadastrarConsulta);
 
 // Rota para concluir uma consulta
-router.post('/confirmar_consulta', consultasController.addMedicoNaConsulta);
+router.post('/confirmar_consulta', consultasController.confirmarConsulta);
 
 // Rota para excluir uma consulta 
 router.delete('/', consultasController.eliminarConsultaPeloIdAcessToken);
 
 // Rota para obter todas consultas do medico
-router.post('/consultas_do_medico', consultasController.obterTodasConsultaPeloTokenMedico);
+router.post('/consultas_do_medico', consultasController.obterTodasConsultaPeloTokenADM);
 
 //Rota para obter todas consultas do usuario
 router.post('/consultas_do_usuario',consultasController.obterTodasConsultaPeloTokenUsuario)

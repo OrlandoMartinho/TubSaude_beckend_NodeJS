@@ -4,27 +4,16 @@ const notify = require('../controllers/NotificacoesController');
 
 const ConsultasController = {
 
-
-    
-
-
-
-
-
-
-
-
-    // Método para cadastrar uma nova consulta
     cadastrarConsulta: async (req, res) => {
-        const { nome_do_paciente, genero, data_de_nascimento, accessToken ,descricao} = req.body;
-        const id_usuario = token.usuarioId(accessToken);
-        if (!id_usuario || !(await token.verificarTokenUsuario(accessToken))) {
-            return res.status(403).json({ mensagem: 'Token inválido' });
+        const {accessToken, especialidade,data_da_consulta,nome,email} = req.body;
+        const id_usuario=token.usuarioId(accessToken);
+        if(!(await token.verificarTokenUsuario(accessToken)) ){
+            return res.status(401).json({ mensagem: 'Tokens inválidos' });
         }
     
-        const insertConsulta = 'INSERT INTO Consultas (nome_do_paciente, genero, data_de_nascimento,descricao, id_usuario) VALUES (?, ?, ?, ?,?)';
+        const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,id_usuario) VALUES (?, ?, ?, ?,?)';
     
-        db.query(insertConsulta, [nome_do_paciente, genero, data_de_nascimento, id_usuario], (err, result) => {
+        db.query(insertConsulta, [ especialidade,data_da_consulta,nome,email, id_usuario], (err, result) => {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
@@ -33,18 +22,20 @@ const ConsultasController = {
         });    
     },
     // Método para adicionar um médico à consulta
-    addMedicoNaConsulta: async (req, res) => {
-        const { data_de_marcacao, nome_do_medico, accessToken, id_consulta, accessTokenUser } = req.body;
-        const id_medico = token.medicoId(accessToken);
-        const id_usuario = token.usuarioId(accessTokenUser);
-        
-        if (!id_medico || !id_usuario) {
-            return res.status(403).json({ mensagem: 'Tokens inválidos' });
-        }
+    confirmarConsulta: async (req, res) => {
+        const {accessToken,id_consulta}=req.body
 
-        if( !(await token.verificarTokenUsuario(accessTokenUser)) || !(await token.verificarTokenMedico(accessToken))){
-            return res.status(200).json({ mensagem: 'Tokens inválidos' });
-        }
+        const email=token.usuarioEmail(accessToken)
+        const validarAdm=email===credenciaisAdm.email
+            if (!validarAdm) {
+                res.status(401).json({ error: 'Tokem inválido' });
+                return;
+            }
+
+            if(!id_consulta){
+                res.status(400).json({ error: 'Complete bem os campos' });
+                return;
+            }
     
         // Verifica se a consulta existe antes de atualizá-la
         const consultaExistente = await new Promise((resolve, reject) => {
@@ -62,15 +53,13 @@ const ConsultasController = {
             return res.status(404).json({ mensagem: 'Consulta não encontrada' });
         }
     
-        const updateConsulta = 'UPDATE Consultas SET data_de_marcacao = ?, nome_do_medico = ?, id_medico = ?, agendado = ? WHERE id_consulta = ?';
+        const updateConsulta = 'UPDATE Consultas SET status = ?  WHERE id_consulta = ?';
     
-        db.query(updateConsulta, [data_de_marcacao, nome_do_medico, id_medico, 1, id_consulta], (err, result) => {
+        db.query(updateConsulta, [1, id_consulta], (err, result) => {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
-            
-            const notificacao = "A sua consulta foi marcada para " + data_de_marcacao;
-           notify.addNotificacao(accessToken, notificacao, accessTokenUser); 
+             
             console.log(result)
             res.json({ mensagem: 'Consulta agendada com sucesso' });
         });    
@@ -132,7 +121,7 @@ const ConsultasController = {
         });
     },
     // Método para obter todas as consultas de um médico
-    obterTodasConsultaPeloTokenMedico: async (req, res) => {
+    obterTodasConsultaPeloTokenADM: async (req, res) => {
         const { accessToken } = req.body;
         const id_medico = token.medicoId(accessToken);
 

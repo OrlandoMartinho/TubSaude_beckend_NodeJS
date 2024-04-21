@@ -9,6 +9,6 @@ router.post('/criar', conversasController.criarConversa);
 router.post('/listar', conversasController.listarConversas);
  
 // Rota para eliminar uma conversa
-router.post('/eliminar', conversasController.eliminarConversa);
+router.delete('/', conversasController.eliminarConversa);
 
 module.exports = router;
