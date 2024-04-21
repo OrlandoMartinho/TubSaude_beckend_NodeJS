@@ -238,8 +238,6 @@ Essas são as rotas disponíveis para lidar com as operações relacionadas aos 
 
 ---
 
-Essas são as 12 rotas atualizadas com as chaves necessárias para fazer a requisição em cada uma.
-
 ### 1. Receber Código de Verificação
 
 - **Rota**: `POST /usuarios/verificar`
