@@ -25,7 +25,7 @@ const conversasRoutes = require('./routes/ConversasRoutes');
 const admRoutes = require('./routes/AdmRoutes');
 const consultasRoutes=require('./routes/ConsultasRoutes')
 const mensagensRoutes=require('./routes/MensagemRoutes')
-
+const contatosRoutes=require('./routes/contatosRoutes')
 
 
 // Adicionar rotas
@@ -35,7 +35,7 @@ app.use('/mensagens',mensagensRoutes)
 app.use('/notificacoes', notificacoesRoutes);
 app.use('/conversas', conversasRoutes);
 app.use('/consultas',consultasRoutes)
-
+app.use('/contactos',contatosRoutes)
 // Iniciar o servidor
 const PORT = process.env.PORT||3000;
 
