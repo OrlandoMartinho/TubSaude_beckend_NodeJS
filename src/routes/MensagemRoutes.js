@@ -18,7 +18,7 @@ router.delete('/',mensagensController.excluirMensagem)
 router.post('/enviar_arquivo',mensagensController.enviarMensagemDeArquivo)
 
 //Rota para eliminar um arquivo
-router.delete('/eliminar_arquivo',mensagensController.excluirArquivo)
+router.delete('/eliminar_arquivo/:nomeDoArquivo',mensagensController.excluirArquivo)
 
 //Rota para obter um arquivo
 router.post('/obter_arquivo/:nomeDoArquivo', mensagensController.retornarArquivo);

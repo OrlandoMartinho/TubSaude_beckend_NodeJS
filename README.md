@@ -458,12 +458,11 @@ Aqui estão as rotas corrigidas:
 
 ### 6. Eliminar um Arquivo
 
-- **Rota**: `DELETE /mensagens/eliminar_arquivo`
+- **Rota**: `DELETE /mensagens/eliminar_arquivo/:nomeDoArquivo`
 - **Corpo da Requisição**:
   ```json
   {
     "accessToken": "{accessToken}",
-    "nomeDoArquivo": "Nome do Arquivo"
   }
   ```
 
