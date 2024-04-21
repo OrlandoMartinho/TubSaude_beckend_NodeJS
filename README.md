@@ -475,3 +475,7 @@ Aqui estão as rotas corrigidas:
     "accessToken": "{accessToken}"
   }
   ```
+
+  ## Conclusão
+
+  Com isso, o README está completo, fornecendo uma visão geral do projeto, instruções de configuração e detalhes sobre cada rota disponível no backend do aplicativo TubSaude. Ele também inclui informações sobre as respostas comuns e a estrutura das requisições para cada rota. Se precisar de mais alguma coisa ou tiver alguma dúvida, estou à disposição para ajudar!
