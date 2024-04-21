@@ -36,7 +36,7 @@ const notificacoesController = {
                 return res.status(500).json({Mensagem:"Erro interno do servidor"})
             }
     
-            if(result[0].token!=accessToken){
+            if(result[0].token!=accessToken || token.usuarioId(accessToken)!=1){
                 return res.status(401).json({Mensagem:"Token inválido"})
             }
 
