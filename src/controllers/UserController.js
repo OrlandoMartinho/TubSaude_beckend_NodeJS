@@ -421,7 +421,7 @@ const UsersController = {
                 return res.status(500).json({Mensagem:"Erro interno do servidor"})
             }
     
-            if(result[0].token!=accessToken){
+            if(result[0].token!=accessToken||token.usuarioId(accessToken)!=1){
                 return res.status(401).json({Mensagem:"Token inválido"})
             }
 
@@ -589,7 +589,10 @@ const UsersController = {
     receberCodigoParaResetarSenha:async (req,res)=>{
 
         const {email} = req.body;
-            // Verifica se o email já está em uso
+        if(!email){
+            return res.status(400).json({Mensagem:"Email inválido"})
+        }
+            // Verifica se o email existe no sistema
             const selectQuery = "SELECT * FROM usuarios where email = ?";
              db.query(selectQuery, [email],async (err,result)=>{
 
@@ -624,9 +627,6 @@ const UsersController = {
 
                 });
     
-              
-             
-                
            })
         
     },
