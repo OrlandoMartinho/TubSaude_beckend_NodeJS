@@ -398,3 +398,81 @@ Aqui estão as rotas corrigidas:
     "id_notificacao": "ID da Notificação"
   }
   ```
+
+## Rota das mensagens
+
+### 1. Enviar Mensagem para um Usuário
+
+- **Rota**: `POST /mensagens/enviar`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "id_conversa": "ID da Conversa",
+    "conteudo": "Conteúdo da Mensagem"
+  }
+  ```
+
+### 2. Listar Pessoas com Quem Houve Troca de Mensagens
+
+- **Rota**: `POST /mensagens/listar`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "id_conversa": "ID da Conversa"
+  }
+  ```
+
+### 3. Editar uma Mensagem
+
+- **Rota**: `PUT /mensagens/`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "id_mensagem": "ID da Mensagem",
+    "novoConteudo": "Novo Conteúdo da Mensagem"
+  }
+  ```
+
+### 4. Excluir uma Mensagem
+
+- **Rota**: `DELETE /mensagens/`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "id_mensagem": "ID da Mensagem"
+  }
+  ```
+
+### 5. Enviar uma Mensagem de Arquivo
+
+- **Rota**: `POST /mensagens/enviar_arquivo`
+- **Corpo da Requisição**: Form Data com o arquivo de áudio e as informações necessárias.
+- **Chaves**:
+  - accessToken
+  - id_conversa
+  - arquivo
+
+### 6. Eliminar um Arquivo
+
+- **Rota**: `DELETE /mensagens/eliminar_arquivo`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "nomeDoArquivo": "Nome do Arquivo"
+  }
+  ```
+
+### 7. Obter um Arquivo
+
+- **Rota**: `POST /mensagens/obter_arquivo/:nomeDoArquivo`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
