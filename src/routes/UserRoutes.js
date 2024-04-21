@@ -23,7 +23,8 @@ router.post('/cadastrar_foto', UsersController.cadastrarFoto)
 //Rota para obter foto do usuário
 router.post('/foto', UsersController.obterFoto) 
 //Rota para Receber codigo para resetar a Password
-router.post('/resetar_senha', UsersController.receberCodigoParaResetarSenha)
-
+router.post('/receber_codigo_de_reset', UsersController.receberCodigoParaResetarSenha)
+//Rota para Receber codigo para alterar Password
+router.post('/alterar_senha', UsersController.receberCodigoParaResetarSenha)
 
 module.exports = router;
