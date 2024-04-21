@@ -21,4 +21,5 @@ router.post('/consultas_do_usuario',consultasController.obterTodasConsultaPeloTo
 router.post('/editar_especialidade',consultasController.cadastrarEspecialidades)
 //Rota para retornar todas as especialidades
 router.post('/especialidades',consultasController.obterEspecialidades)
+
 module.exports = router;
