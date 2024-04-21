@@ -347,3 +347,29 @@ Aqui estão as rotas para lidar com as operações relacionadas a consultas na a
     "id_conversa": "ID da Conversa"
   }
   ```
+## Rotas das Notificações
+
+Aqui estão as rotas corrigidas:
+
+### 1. Obter Todas as Notificações
+
+- **Rota**: `POST /notificacoes/`
+- **Descrição**: Permite obter todas as notificações do sistema, disponível apenas para o ADM.
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}"
+  }
+  ```
+
+### 2. Marcar Notificação Como Lida
+
+- **Rota**: `POST /notificacoes/visulizar`
+- **Descrição**: Permite marcar uma notificação como lida.
+- **Corpo da Requisição**:
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "id_notificacao": "ID da Notificação"
+  }
+  ```
