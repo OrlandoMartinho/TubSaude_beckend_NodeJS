@@ -41,10 +41,8 @@ const conversasController = {
         try {
             const {  accessToken ,id_usuario} = req.body;
     
-            
-            const email = token.usuarioEmail(accessToken);
-            const validarAdm=email===credenciaisAdm.email
-            if (validarAdm ==false && !id_usuario) {
+
+            if (!accessToken || !id_usuario) {
                 console.error('Erro ao obter IDs do usuário e do médico');
                 res.status(400).json({ error: 'Verifique bem os valores' });
                 return;
@@ -56,7 +54,13 @@ const conversasController = {
                userId = token.usuarioId(accessToken);
             }
 
-            if( !(await token.verificarTokenUsuario(accessToken)) && validarAdm == false){
+            if(id_usuario===token.usuarioId(accessToken)){
+
+                return res.status(400).json({ mensagem: 'Você não pode criar uma conversa com o mesmo usuário' });
+
+            }
+
+            if( !(await token.verificarTokenUsuario(accessToken)) ){
                 return res.status(401).json({ mensagem: 'Token inválido' });
             }
 
@@ -98,8 +102,12 @@ const conversasController = {
         try {
             const {accessToken} = req.body
 
-            const {email} = jwt.verify(accessToken, secretKey.secretKey);
+            const {id_usuario,email} = jwt.verify(accessToken, secretKey.secretKey);
     
+            if(!id_usuario===1){
+                return res.status(401).json({Mensagem:"Token inválido"})
+            }
+
             const selectQuery='SELECT * FROM usuarios WHERE email = ?'
     
             db.query(selectQuery,[email],async (err, result) => {
