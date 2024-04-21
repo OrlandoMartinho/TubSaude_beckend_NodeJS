@@ -311,6 +311,31 @@ Aqui estão as rotas para lidar com as operações relacionadas a consultas na a
   }
   ```
 
+
+
+## Rota para as Especialidades
+
+### 1-Rota para cadastrar mais especialidades
+- **Rota**: `POST /consultas/editar_especialidade`
+- **Descrição**: Cadastra mais especialidades .
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "especialidade": "açado,cuzido,fritado"
+  }
+  ```
+### 2-Rota para obter todas especialidades
+- **Rota**: `POST /consultas/especialidades`
+- **Descrição**: Obtém todas  especialidades da clinica
+- **Corpo da Requisição**: 
+  ```json
+  {
+    "accessToken": "{accessToken}",
+    "especialidade": "açado,cuzido,fritado"
+  }
+  ```
+
 ## Rotas das conversas
 
 ### 1. Criar Conversa
