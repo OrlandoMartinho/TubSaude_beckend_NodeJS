@@ -12,7 +12,7 @@ router.post('/confirmar_consulta', consultasController.confirmarConsulta);
 router.delete('/', consultasController.eliminarConsultaPeloIdAcessToken);
 
 // Rota para obter todas consultas do medico
-router.post('/consultas_do_medico', consultasController.obterTodasConsultaPeloTokenADM);
+router.post('/todas_consultas', consultasController.obterTodasConsultaPeloTokenADM);
 
 //Rota para obter todas consultas do usuario
 router.post('/consultas_do_usuario',consultasController.obterTodasConsultaPeloTokenUsuario)

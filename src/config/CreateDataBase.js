@@ -4,7 +4,8 @@ const admCredenciais=require('../private/CredenciaisADM.json')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const salt = bcrypt.genSaltSync(saltRounds);
-
+const jwt = require('jsonwebtoken');
+const secretKey=require('../private/secretKey.json');
 // Chaves de conexão com o banco de dados
 const dbConfig = {
   host: keysBd.host,
@@ -160,23 +161,23 @@ connection.connect(async (err) => {
     ];
 
     async function  adm(connection){
-
+      
       
       const senhaEncriptada = await bcrypt.hashSync(admCredenciais.senha, salt);
-        
+      const accessToken = jwt.sign({ id_usuario: 1, email:admCredenciais.email,senha:senhaEncriptada }, secretKey.secretKey);
       // Criar uma conexão com o banco de dados
      
       const deleteQuery = 'SELECT * FROM usuarios WHERE email = ?';
-      const insertQuery = 'INSERT INTO usuarios (id_usuario,email, senha) VALUES (?,?, ?)';
+      const insertQuery = 'INSERT INTO usuarios (email, senha,token,nome_de_usuario) VALUES (?,?,?,?)';
   
       connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
           if (err) {
               console.error('Erro ao excluir usuário:', err.message);
               return;
-          }
+          } 
   
           if(results.length==0){
-            connection.query(insertQuery, [0,admCredenciais.email, senhaEncriptada], (err, results) => {
+            connection.query(insertQuery, [admCredenciais.email, senhaEncriptada,accessToken,"administrador"], (err, results) => {
               if (err) {
                   console.error('Erro ao inserir usuário:', err);
                   return;
@@ -184,6 +185,26 @@ connection.connect(async (err) => {
                                                      
               console.log('Adm atualizado com sucesso.');
           });
+          }else{
+ 
+              
+ 
+            const updateQuery = 'UPDATE usuarios SET token = ?,email = ?,senha = ? WHERE id_usuario = 1';
+
+            // Parâmetros para a consulta SQL
+            const params = [accessToken,admCredenciais.email,senhaEncriptada];
+        
+            // Executar a consulta SQL
+            connection.query(updateQuery, params, (err, result) => {
+                if (err) {
+                    console.error('Erro ao atualizar usuário:', err);
+                    
+                }
+
+               console.log("Administrador actualizado com sucesso")
+             
+            });
+            
           }
           
       });

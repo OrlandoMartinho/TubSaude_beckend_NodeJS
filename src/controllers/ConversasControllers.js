@@ -54,8 +54,6 @@ const conversasController = {
 
             if(await token.verificarTokenUsuario(accessToken)==true){
                userId = token.usuarioId(accessToken);
-            }else if(await token.verificarTokenUsuario(accessToken)==false){ 
-               userId=id_usuario
             }
 
             if( !(await token.verificarTokenUsuario(accessToken)) && validarAdm == false){
@@ -65,12 +63,12 @@ const conversasController = {
             var b
             var nome_de_usuario;
 
-            if(token.usuarioNome(accessToken)){
+            if(token.usuarioNome(accessToken)&&token.usuarioId(accessToken)!=1){
               
                 nome_de_usuario=token.usuarioNome(accessToken)
                 criar(res,userId,nome_de_usuario)
             }else{
-             
+             console.log(id_usuario)
             db.query("SELECT * FROM usuarios WHERE id_usuario = ?",[id_usuario],(err,result)=>{
 
                     if(err){
@@ -78,7 +76,9 @@ const conversasController = {
                         return res.status(500).json({Mensagem:"Erro interno do servidor"})
                     }
                    
-                   
+                        if(result.length===0){
+                            return res.status(404).json({Mensagem:"Usuario não encontrado"})
+                        }
                         nome_de_usuario=result[0].nome_de_usuario
                         criar(res,userId,nome_de_usuario)
                     
