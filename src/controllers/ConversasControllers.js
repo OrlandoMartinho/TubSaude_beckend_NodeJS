@@ -4,7 +4,21 @@ const secretKey = require('../private/secretKey.json');
 const credenciaisAdm=require('../private/CredenciaisADM.json')
 const token = require('../utils/token');
 
+function eliminar(res,id_conversa){
 
+    const eliminarConversaQuery = `DELETE FROM conversas WHERE id_conversa = ?`;
+    db.query(eliminarConversaQuery, [id_conversa], (err, result) => {
+        if (err) {
+            console.error('Erro ao eliminar conversa:', err.message);
+            res.status(500).json({ error: 'Erro interno do servidor ao eliminar conversa' });
+            return;
+        }
+
+        console.log('Conversa eliminada com sucesso');
+       return res.status(200).json({ message: 'Conversa eliminada com sucesso' });
+    });
+
+}
 
 function criar(res,userId,nome_de_usuario)
 {
@@ -60,8 +74,9 @@ const conversasController = {
                 return res.status(401).json({ mensagem: 'Forneça o id do usuario' });
             
             }
-
-            const selectQuery='SELECT nome_de_usuario FROM usuarios WHERE id_usuario = ?'
+            let userId
+            if(nome_de_usuario === 'administrador'){
+                const selectQuery='SELECT nome_de_usuario FROM usuarios WHERE id_usuario = ?'
             db.query(selectQuery,[id_usuario],(err,results)=>{
 
                 if(err){
@@ -72,16 +87,20 @@ const conversasController = {
 
                 nome_de_usuario =results[0].nome_de_usuario
 
-                let userId =id_usuario
 
-                if(nome_de_usuario==='administrador'){
+                 userId =id_usuario
+
                     criar(res,userId,nome_de_usuario)
-                }else{
-                    userId = token.usuarioId(accessToken)
-                    criar(res,userId,nome_de_usuario)
-                }
+               
 
             })
+            }else{
+                userId = token.usuarioId(accessToken)
+                nome_de_usuario=token.usuarioNome(accessToken)
+                criar(res,userId,nome_de_usuario)
+            }
+
+            
 
           
            
@@ -99,8 +118,8 @@ const conversasController = {
             const {accessToken} = req.body
 
             const {id_usuario,email} = jwt.verify(accessToken, secretKey.secretKey);
-    
-            if(!id_usuario===1){
+           
+            if(id_usuario!=1){
                 return res.status(401).json({Mensagem:"Token inválido"})
             }
 
@@ -145,21 +164,22 @@ const conversasController = {
             }
 
             const id_usuario =token.usuarioId(accessToken)
-            const email_user =token.usuarioEmail(accessToken)
-
-            const {email} = jwt.verify(accessToken, secretKey.secretKey);
-            if(!email||!email_user){
-
+            const email=token.usuarioEmail(accessToken)
+            if(! await token.verificarTokenUsuario(accessToken)){
+                return res.status(401).json({Mensagem:"usuário não autenticado"})
             }
-            const selectQuery='SELECT * FROM usuarios WHERE email = ? OR email = ?'
+
+
+
+
+            const selectQuery='SELECT * FROM usuarios WHERE email = ? '
     
-            db.query(selectQuery,[email,email_user],async (err, result) => {
+            db.query(selectQuery,[email],async (err, result) => {
     
                 if(err){
                     console.log("Erro:"+err.message)
                     return res.status(500).json({Mensagem:"Erro interno do servidor"})
                 }
-                console.log(email_user)
         
                 if(result.length===0 && !await token.verificarTokenUsuario(accessToken)){
                     return res.status(401).json({Mensagem:"Token inválido"})
@@ -168,33 +188,48 @@ const conversasController = {
                 if(result[0].token!=accessToken && !await token.verificarTokenUsuario(accessToken)){
                     return res.status(401).json({Mensagem:"Token inválido"})
                 }
-    
-            const verificarConversaQuery = `SELECT * FROM conversas WHERE id_conversa = ? OR id_usuario = ? `;
-            db.query(verificarConversaQuery, [id_conversa,id_usuario], (err, result) => {
-                if (err) {
-                    console.error('Erro ao verificar a conversa:', err.message);
-                    res.status(500).json({ error: 'Erro interno do servidor ao verificar a conversa' });
-                    return;
-                }
+                console.log(token.usuarioId(accessToken)==1)
+                if(token.usuarioId(accessToken)==1){
 
-                if (result.length === 0) {
-                    console.error('Conversa não encontrada ');
-                    res.status(404).json({ error: 'Conversa não encontrada ou não relacionada ao usuário' });
-                    return;
-                }
-
-                const eliminarConversaQuery = `DELETE FROM conversas WHERE id_conversa = ?`;
-                db.query(eliminarConversaQuery, [id_conversa], (err, result) => {
+                    const verificarConversaQuery = `SELECT * FROM conversas WHERE id_conversa = ?`;
+                    db.query(verificarConversaQuery, [id_conversa], (err, result) => {
                     if (err) {
-                        console.error('Erro ao eliminar conversa:', err.message);
-                        res.status(500).json({ error: 'Erro interno do servidor ao eliminar conversa' });
+                        console.error('Erro ao verificar a conversa:', err.message);
+                        res.status(500).json({ error: 'Erro interno do servidor ao verificar a conversa' });
                         return;
                     }
-
-                    console.log('Conversa eliminada com sucesso');
-                    res.status(200).json({ message: 'Conversa eliminada com sucesso' });
+    
+                    if (result.length === 0) {
+                        console.error('Conversa não encontrada ');
+                        res.status(404).json({ error: 'Conversa não encontrada ' });
+                        return;
+                    }
+    
+                   eliminar(res,id_conversa)
                 });
-            });
+
+
+                }else{
+
+                    const verificarConversaQuery = `SELECT * FROM conversas WHERE id_conversa = ? AND id_usuario = ? `;
+                    db.query(verificarConversaQuery, [id_conversa,id_usuario], (err, result) => {
+                    if (err) {
+                        console.error('Erro ao verificar a conversa:', err.message);
+                        res.status(500).json({ error: 'Erro interno do servidor ao verificar a conversa' });
+                        return;
+                    }
+    
+                    if (result.length === 0) {
+                        console.error('Conversa não encontrada ');
+                        res.status(404).json({ error: 'Conversa não encontrada ou não relacionada ao usuário' });
+                        return;
+                    }
+    
+                   eliminar(res,id_conversa)
+                });
+                    
+                }
+                
             })
         } catch (error) {
             console.error('Erro ao eliminar conversa:', error.message);
