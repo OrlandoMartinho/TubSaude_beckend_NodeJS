@@ -21,12 +21,44 @@ const upload = multer({
 }).single('file'); 
 
 
+
+function enviar(res,conteudo,id_conversa,nome_de_usuario){
+
+    const enviarMensagemQuery = `INSERT INTO mensagens (conteudo, id_conversa,nome_de_usuario) VALUES (?, ?, ?)`;
+    db.query(enviarMensagemQuery, [conteudo,  id_conversa,nome_de_usuario], (err, result) => {
+        if (err) {
+            console.error('Erro ao enviar a mensagem:', err.message);
+            res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
+            return;
+        }
+
+        console.log("Nova mensagem enviada com sucesso");
+      return  res.status(200).json({ message: 'Mensagem enviada com sucesso' });
+    });
+}
+
+function listar(res,id_conversa){
+
+        const listarMensagensQuery = `
+        SELECT * FROM mensagens where id_conversa=${id_conversa} 
+     `;
+     db.query(listarMensagensQuery, (err, result) => {
+        if (err) {
+            console.error('Erro ao listar mensagens:', err.message);
+            res.status(500).json({ error: 'Erro interno do servidor ao listar mensagens' });
+            return;
+        }
+
+        res.status(200).json({ mensagens: result });
+    });
+
+
+}
+
 const mensagensController = {
     // Enviar uma nova mensagem em uma conversa
     enviarMensagem: async (req, res) => {
-        try {
             const { accessToken, id_conversa, conteudo ,} = req.body;
-            const email= token.usuarioEmail(accessToken);
             
             if(!(await token.verificarTokenUsuario(accessToken))){
                 return res.status(401).json({ mensagem: 'Tokens inválidos' });
@@ -35,46 +67,25 @@ const mensagensController = {
             if(!conteudo){
                 return res.status(400).json({ mensagem: 'Dados incompletos' });
             }
-    
-            const userId =token.usuarioId(accessToken)
-
-            if(userId=!1){
-                const notificacao = email+" Enviou uma mensagem nova ";
+            const nome_de_usuario=token.usuarioNome(accessToken)
+            const userId=token.usuarioId(accessToken)
+            if(userId!=1){
+                const notificacao = token.usuarioEmail(accessToken)+" Enviou uma mensagem nova ";
                 notify.addNotificacao(notificacao); 
             }
+    
             if(userId===1){
-                const enviarMensagemQuery = `INSERT INTO mensagens (conteudo, id_conversa,id_usuario) VALUES (?, ?, ?)`;
-                db.query(enviarMensagemQuery, [conteudo,  id_conversa, userId], (err, result) => {
-                    if (err) {
-                        console.error('Erro ao enviar a mensagem:', err.message);
-                        res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
-                        return;
-                    }
-        
-                    console.log("Nova mensagem enviada com sucesso");
-                    res.status(200).json({ message: 'Mensagem enviada com sucesso' });
-                });
+              enviar(res,conteudo,id_conversa,nome_de_usuario)
             }else{
-                const selectQuery='SELECT id_usuario FROM consultas where id_usuario =?'
-                
+                const selectQuery='SELECT * FROM conversas where id_usuario =?'
+                console.log(userId)
                 db.query(selectQuery,[userId],(err,result)=>{
                     if(err){
                         console.log("Erro:"+err.message)
                         return res.status(500).json({Mensagem:"Erro interno do servidor"})
                     }
-
                     if(userId==result[0].id_usuario){
-                        const enviarMensagemQuery = `INSERT INTO mensagens (conteudo, id_conversa,id_usuario) VALUES (?, ?, ?)`;
-                        db.query(enviarMensagemQuery, [conteudo,  id_conversa, userId], (err, result) => {
-                            if (err) {
-                                console.error('Erro ao enviar a mensagem:', err.message);
-                                res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
-                                return;
-                            }
-                
-                            console.log("Nova mensagem enviada com sucesso");
-                           return res.status(200).json({ message: 'Mensagem enviada com sucesso' });
-                        });
+                       enviar(res,conteudo,id_conversa,nome_de_usuario)
                     }else{
                         return res.status(400).json({ message: 'O usuario não tem permissão para enviar mensagem nesta conversa' });
                         
@@ -83,39 +94,51 @@ const mensagensController = {
                 })
             }
            
-        } catch (error) {
-            console.error('Erro ao decodificar o token do usuário ou médico:', error.message);
-            res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
-        }
+        
     },
     // Listar mensagens de uma conversa de um usuário ou médico em ordem de envio
     listarMensagens:async (req, res) => {
-        try {
+
             const { accessToken, id_conversa} = req.body;
-            const email= token.usuarioEmail(accessToken);
-            const validarAdm=email===credenciaisAdm.email
-            
-            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+          
+            if(!(await token.verificarTokenUsuario(accessToken))){
                 return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
+            if(token.usuarioId(accessToken)===1){
+                listar(res,id_conversa)
+          
+            }else{
+                
+                const id_usuario=token.usuarioId(accessToken)
+
+                const selectQuery="SELECT id_conversa FROM conversas WHERE id_usuario = "+id_usuario
+               
+                db.query(selectQuery,(err,result)=>{
+
+                    if(err){
+                        console.log("Erro:"+err.message)
+                        return res.status(500).json({Mensagem:"Erro interno do servidor"})
+                    }
+
+                    if(result[0].id_conversa!=id_conversa){
+                        return res.status(400).json({Mensagem:"Usuário não permição de enviar mensagem"})
+                    }
+
+                    listar(res,id_conversa)
+
+
+                })
+
+
+
+            }
+
+
+
+
     
-            const listarMensagensQuery = `
-                SELECT * FROM mensagens where id_conversa=${id_conversa} 
-            `;
-    
-            db.query(listarMensagensQuery, (err, result) => {
-                if (err) {
-                    console.error('Erro ao listar mensagens:', err.message);
-                    res.status(500).json({ error: 'Erro interno do servidor ao listar mensagens' });
-                    return;
-                }
-    
-                res.status(200).json({ mensagens: result });
-            });
-        } catch (error) {
-            console.error('Erro ao decodificar o token do usuário ou médico:', error.message);
-            res.status(500).json({ error: 'Erro interno do servidor ao listar mensagens' });
-        }
+       
+        
     },
     // Excluir uma mensagem em uma conversa
     excluirMensagem:async (req, res) => {

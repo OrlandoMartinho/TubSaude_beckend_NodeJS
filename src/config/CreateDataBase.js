@@ -142,8 +142,8 @@ connection.connect(async (err) => {
           id_mensagem INT AUTO_INCREMENT PRIMARY KEY,
           conteudo VARCHAR(45) DEFAULT NULL,
           data_da_mensagem DATETIME DEFAULT current_timestamp(),
-          id_usuario INT NOT NULL,
-          id_conversa INT NOT NULL
+          id_conversa INT NOT NULL,
+          nome_de_usuario varchar(45) DEFAULT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
       `CREATE TABLE IF NOT EXISTS notificacoes (
