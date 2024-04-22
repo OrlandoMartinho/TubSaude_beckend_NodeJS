@@ -142,18 +142,17 @@ const mensagensController = {
     },
     // Excluir uma mensagem em uma conversa
     excluirMensagem:async (req, res) => {
-        try {
+
             const { accessToken, id_mensagem} = req.body;
-            const email= token.usuarioEmail(accessToken);
-            const validarAdm=email===credenciaisAdm.email
             
             if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
                 return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
 
-          const id=token.usuarioId(accessToken)
-
+            const id=token.usuarioId(accessToken)
+            const nome_de_usuario=token.usuarioNome(accessToken)
             const verificarMensagemQuery = `SELECT id_usuario FROM mensagens WHERE id_mensagem = ?`;
+
             db.query(verificarMensagemQuery, [id_mensagem], (err, result) => {
                 if (err) {
                     console.error('Erro ao verificar a mensagem:', err.message);
@@ -168,8 +167,7 @@ const mensagensController = {
                 }
     
                 const mensagem = result[0];
-                console.log(mensagem)
-                if (mensagem.id_usuario !== id ) {
+                if (mensagem.nome_de_usuario !== nome_de_usuario ) {
                     console.error('Usuário  não tem permissão para excluir esta mensagem');
                     res.status(403).json({ error: 'Usuário ou médico não tem permissão para excluir esta mensagem' });
                     return;
@@ -187,19 +185,14 @@ const mensagensController = {
                     res.status(200).json({ message: 'Mensagem excluída com sucesso' });
                 });
             });
-        } catch (error) {
-            console.error('Erro ao decodificar o token do usuário ou médico:', error.message);
-            res.status(500).json({ error: 'Erro interno do servidor ao excluir mensagem' });
-        }
     },
     // Editar o conteúdo de uma mensagem em uma conversa
     editarMensagem:async (req, res) => {
         try {
             const { accessToken, id_mensagem,novoConteudo} = req.body;
-            const email= token.usuarioEmail(accessToken);
-            const validarAdm=email===credenciaisAdm.email
             
-            if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+            
+            if(!(await token.verificarTokenUsuario(accessToken))){
                 return res.status(401).json({ mensagem: 'Tokens inválidos' });
             }
 
@@ -207,7 +200,7 @@ const mensagensController = {
                 return res.status(400).json({ mensagem: 'Campos incompletos' });
             }
 
-          const id=token.usuarioId(accessToken)
+          const nome_de_usuario=token.usuarioId(accessToken)
 
             const verificarMensagemQuery = `SELECT id_usuario FROM mensagens WHERE id_mensagem = ?`;
             db.query(verificarMensagemQuery, [id_mensagem], (err, result) => {
@@ -224,7 +217,7 @@ const mensagensController = {
                 }
     
                 const mensagem = result[0];
-                if (mensagem.id_usuario !== id) {
+                if (mensagem.nome_de_usuario !== nome_de_usuario) {
                     console.error('Usuário ou médico não tem permissão para editar esta mensagem');
                     res.status(403).json({ error: 'Usuário ou médico não tem permissão para editar esta mensagem' });
                     return;
@@ -255,18 +248,16 @@ const mensagensController = {
                         return res.status(500).send('Erro ao fazer upload da audio');
                     }
                     const { accessToken, id_conversa} = req.body;
-                    const email= token.usuarioEmail(accessToken);
-                    const validarAdm=email===credenciaisAdm.email
                     
-                    if(!(await token.verificarTokenUsuario(accessToken)) &&!validarAdm){
+                    if(!(await token.verificarTokenUsuario(accessToken)) ){
                         return res.status(401).json({ mensagem: 'Tokens inválidos' });
                     }
         
         
                     const id=token.usuarioId(accessToken)
-            
+                    
+                    const nome_de_usuario=token.usuarioId(accessToken)
         
-            
                     const arquivo = req.file;
                     if (!arquivo) {
                         console.log({ mensagem: 'Nenhum arquivo foi enviado' })
