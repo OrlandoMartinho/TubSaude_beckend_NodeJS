@@ -10,12 +10,12 @@ async function enviarArquivo() {
 
         // Dados do arquivo para enviar para a API
         const dadosArquivo = {
-            id_conversa: '4',
-            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJlbWFpbCI6ImNsaW5pY2FnaXJhc3Nzb2xAZ21haWwuY29tIiwic2VuaGEiOiIkMmIkMTAkYjJxbHhJckVWd2ZVVUYuYUNLRERMT0h5SUZSYkNEMEM5VWpSUFpTQVZRYmNRNXlzY21Cc08iLCJpYXQiOjE3MTM3MDI1NjR9.qs5iBoKNS-JgBwQPXSlvyBXCMKtBmXF1Ia8IdKwMOSc'
+            id_conversa: '15',
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoyLCJlbWFpbCI6Im9ybGFuZG9wZWRybzE3NkBnbWFpbC5jb20iLCJub21lX2RlX3VzdWFyaW8iOiJvcmxhbmRvcGVkcm9zYWlvbWJvIiwic2VuaGEiOiIkMmIkMTAkeHB6bzZJSkFUTzMyYzd0bXlCaC5UT3dTMjY0WFVQN3JyTXM3elV2QkRNamNxWjVmRWlxM0MiLCJpYXQiOjE3MTM3MTg4NDN9.-YsFHSE7xQ14qhWJcwxMuZbNzlN1VkOQMSg_bQf1llI'
         };
 
         // Caminho do arquivo a ser enviado
-        const caminhoArquivo = '3.mp3'; // Substitua 'arquivo.pdf' pelo caminho do seu arquivo
+        const caminhoArquivo = '2.jpg'; // Substitua 'arquivo.pdf' pelo caminho do seu arquivo
 
         // Cria um objeto FormData
         const formData = new FormData();

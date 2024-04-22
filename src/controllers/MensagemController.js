@@ -55,9 +55,9 @@ function listar(res,id_conversa){
 
 }
 
-function enviarArquivo(res,id_conversa,arquivo,nome_de_usuario){
-    const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa, id_usuario) VALUES ( ?, ?)`;
-    db.query(enviarMensagemQuery, [ id_conversa,id], (err, result) => {
+function enviarArquivo(res,id_conversa,arquivo,nome_de_usuario,extensao){
+    const enviarMensagemQuery = `INSERT INTO mensagens (id_conversa) VALUES (?)`;
+    db.query(enviarMensagemQuery, [ id_conversa], (err, result) => {
         if (err) {
             console.error('Erro ao enviar a mensagem:', err.message);
             res.status(500).json({ error: 'Erro interno do servidor ao enviar mensagem' });
@@ -81,11 +81,7 @@ function enviarArquivo(res,id_conversa,arquivo,nome_de_usuario){
        return  res.status(200).json({ message: 'Arquivo enviado com sucesso' });
 
         })
-       
     });
-
-       return res.status(200).json({ message: 'Mensagem enviada com sucesso' });
-  
 }
 
 const mensagensController = {
@@ -317,8 +313,8 @@ const mensagensController = {
                                 return res.status(500).json({Mensagem:"Erro interno do servidor"})
                             }
         
-                            if(userId==result[0].id_usuario){
-                                enviarArquivo(res,id_conversa,arquivo,nome_de_usuario)
+                            if(id ==result[0].id_usuario){
+                                enviarArquivo(res,id_conversa,arquivo,nome_de_usuario,extensao)
                               
                             }else{
                                 return res.status(400).json({ message: 'O usuario não tem permissão para enviar mensagem nesta conversa' });
@@ -327,7 +323,7 @@ const mensagensController = {
         
                         })
                     }else{
-                        enviarArquivo(res,id_conversa,arquivo,nome_de_usuario)
+                        enviarArquivo(res,id_conversa,arquivo,nome_de_usuario,extensao)
                     }
 
 
