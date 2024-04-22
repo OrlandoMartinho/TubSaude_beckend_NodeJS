@@ -113,7 +113,7 @@ connection.connect(async (err) => {
         utilizado INT(1) DEFAULT NULL,
         email VARCHAR(45) DEFAULT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
-    
+                    
       `CREATE TABLE IF NOT EXISTS consultas (
           id_consulta INT AUTO_INCREMENT PRIMARY KEY,
           especialidade VARCHAR(90) DEFAULT NULL,
