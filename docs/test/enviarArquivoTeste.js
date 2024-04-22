@@ -15,7 +15,7 @@ async function enviarArquivo() {
         };
 
         // Caminho do arquivo a ser enviado
-        const caminhoArquivo = '2.jpg'; // Substitua 'arquivo.pdf' pelo caminho do seu arquivo
+        const caminhoArquivo = '3.jpeg'; // Substitua 'arquivo.pdf' pelo caminho do seu arquivo
 
         // Cria um objeto FormData
         const formData = new FormData();

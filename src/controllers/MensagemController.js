@@ -273,8 +273,8 @@ const mensagensController = {
             try {
                 upload(req, res, async function(err) {
                     if (err) {
-                        console.error('Erro ao fazer upload da audio:', err);
-                        return res.status(500).send('Erro ao fazer upload da audio');
+                        console.error('Erro ao fazer upload do arquivo:', err);
+                        return res.status(500).send('Erro ao enviar arquivo, verifica o tamanho');
                     }
                     const { accessToken, id_conversa} = req.body;
                     
@@ -305,16 +305,7 @@ const mensagensController = {
                     }
 
 
-                    const stats = fs.statSync(arquivo);
-
-                    // O tamanho do arquivo está em bytes
-                    const tamanhoEmBytes = stats.size;
-                  
-                    // Verificar se o tamanho é exatamente 1MB (1048576 bytes)
-                    if (tamanhoEmBytes > 1048576) {
-                      console.log('O arquivo tem exatamente 1MB.');
-                      return res.status(400).json({Mensagem:"O arquivo não pode passar de 1MB"})
-                    }
+                    
 
                     if(id!=1){
                         const selectQuery='SELECT * FROM conversas where id_usuario =?'
@@ -341,8 +332,8 @@ const mensagensController = {
 
                     })
             } catch (error) {
-                console.error('Erro ao Enviar Audio:', error.message);
-                res.status(500).json({ mensagem: 'Erro ao Enviar Audio:' });
+                console.error('Erro ao Enviar Arquivo:');
+                res.status(500).json({ mensagem: 'Erro ao Arquivo verifique o tamanho e a extensão:' });
             }
     },
     retornarArquivo: async (req, res)=> {
