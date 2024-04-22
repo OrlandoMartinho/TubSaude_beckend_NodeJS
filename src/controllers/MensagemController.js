@@ -304,6 +304,18 @@ const mensagensController = {
                         return res.status(400).json({ mensagem: 'Formato de arquivo inválido. Apenas arquivos PNG, JPG, JPEG, PDF, TXT, MP3, WAV, M4A, DOC e DOCX são permitidos' });
                     }
 
+
+                    const stats = fs.statSync(arquivo);
+
+                    // O tamanho do arquivo está em bytes
+                    const tamanhoEmBytes = stats.size;
+                  
+                    // Verificar se o tamanho é exatamente 1MB (1048576 bytes)
+                    if (tamanhoEmBytes > 1048576) {
+                      console.log('O arquivo tem exatamente 1MB.');
+                      return res.status(400).json({Mensagem:"O arquivo não pode passar de 1MB"})
+                    }
+
                     if(id!=1){
                         const selectQuery='SELECT * FROM conversas where id_usuario =?'
                 
