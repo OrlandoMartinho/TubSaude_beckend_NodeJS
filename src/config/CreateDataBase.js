@@ -122,7 +122,7 @@ connection.connect(async (err) => {
           email VARCHAR(45) DEFAULT NULL,
           status INT DEFAULT 0,
           hora_da_consulta TIME DEFAULT NULL,
-          nome_do_medico VARCAHAR(45) DEFAULT NULL,
+          nome_do_medico VARCHAR(45) DEFAULT NULL,
           id_usuario INT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
     
