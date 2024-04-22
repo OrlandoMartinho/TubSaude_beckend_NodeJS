@@ -26,7 +26,7 @@ const ConsultasController = {
     // Método para adicionar um médico à consulta
     confirmarConsulta: async (req, res) => {
 
-        const {accessToken,id_consulta,hora_da_consulta}=req.body
+        const {accessToken,id_consulta,hora_da_consulta,nome_do_medico}=req.body
         const id_usuario=token.usuarioId(accessToken)
        if(id_usuario!=1||!(await token.verificarTokenUsuario(accessToken)) ){
             return res.status(401).json({ mensagem: 'Tokens inválidos' });
@@ -54,9 +54,9 @@ const ConsultasController = {
             return res.status(404).json({ mensagem: 'Consulta não encontrada' });
         }
     
-        const updateConsulta = 'UPDATE Consultas SET status = ? ,hora_da_consulta = ? WHERE id_consulta = ?';
+        const updateConsulta = 'UPDATE Consultas SET status = ? ,hora_da_consulta = ?,nome_do_medico = ? WHERE id_consulta = ?';
         const email=consultaExistente[0].email
-        db.query(updateConsulta, [1, hora_da_consulta,id_consulta],async (err, result) => {
+        db.query(updateConsulta, [1, hora_da_consulta,nome_do_medico,id_consulta],async (err, result) => {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
