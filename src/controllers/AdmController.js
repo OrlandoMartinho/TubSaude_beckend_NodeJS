@@ -11,11 +11,11 @@ const AdmController = {
     autenticarAdm: async (req,res) => {
         try {
 
-            const {senha,email} = req.body
+            const {senha,nome_de_usuario} = req.body
             
-            const selectQuery='SELECT * FROM usuarios where email = ?'
+            const selectQuery='SELECT * FROM usuarios where nome_de_usuario = ?'
 
-            db.query(selectQuery,[email,senha],async (err,result)=>{
+            db.query(selectQuery,[nome_de_usuario],async (err,result)=>{
 
                 if(err){
 

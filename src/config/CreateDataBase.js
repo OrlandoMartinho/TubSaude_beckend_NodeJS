@@ -162,15 +162,15 @@ connection.connect(async (err) => {
       const accessToken = jwt.sign({ id_usuario: 1, email:admCredenciais.email,senha:senhaEncriptada ,nome_de_usuario:"administrador"}, secretKey.secretKey);
       // Criar uma conexão com o banco de dados
       const nome='Clinica Geral,Pediatria,Ginicologia,cardiologia,Ortopedia,Dermatologia,Psicologia,Nutrição'
-      const deleteQuery = 'SELECT * FROM usuarios WHERE email = ?';
+      const deleteQuery = 'SELECT * FROM usuarios WHERE nome_de_usuario = ?';
       const insertQuery = 'INSERT INTO usuarios (email, senha,token,nome_de_usuario,nome) VALUES (?,?,?,?,?)';
   
-      connection.query(deleteQuery, [admCredenciais.email], (err, results) => {
+      connection.query(deleteQuery, ['administrador'], (err, results) => {
           if (err) {
               console.error('Erro ao excluir usuário:', err.message);
               return;
           } 
-  
+     
           if(results.length==0){
             connection.query(insertQuery, [admCredenciais.email, senhaEncriptada,accessToken,"administrador",nome], (err, results) => {
               if (err) {

@@ -59,7 +59,7 @@ const UsersController = {
         }
         const dateObj = parse(data_de_nascimento, 'd-MM-yyyy', new Date());
 
-        const formattedDate = format(dateObj, 'yyyy-MM-dd');
+        const formattedDate = format(dateObj, 'dd-MM-yyyy');
 
         const selectCodeQuery = 'SELECT * FROM codigos_verificacao WHERE email = ? AND codigo = ? AND utilizado = 0';
         db.query(selectCodeQuery, [email, codigo], async (err, results) => {
