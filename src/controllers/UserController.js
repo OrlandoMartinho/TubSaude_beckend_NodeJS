@@ -200,7 +200,7 @@ const UsersController = {
                         return res.status(401).json({ Mensagem: "Senha incorreta" });
                     } else {
                     // Gerar token JWT para o usuário autenticado
-                    const accessToken = jwt.sign({ id_usuario: usuario.id_usuario,email:usuario.email, nome_de_usuario: usuario.nome_de_usuario,senha:usuario.senha }, secretKey.secretKey);
+                    const accessToken = jwt.sign({ id_usuario: usuario.id_usuario,email:usuario.email, nome_de_usuario: usuario.nome_de_usuario,senha:usuario.senha ,foto:token.usuarioFoto(usuario.token)}, secretKey.secretKey);
                      
                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
 
@@ -349,7 +349,7 @@ const UsersController = {
                             }else{
                 
                 
-                                   const accessToken2 = jwt.sign({ id_usuario: token.usuarioId(accessToken), email:token.usuarioEmail(accessToken),senha:token.usuarioSenha(accessToken) },token.usuarioNome(accessToken), secretKey.secretKey);
+                                   const accessToken2 = jwt.sign({ id_usuario: token.usuarioId(accessToken), email:token.usuarioEmail(accessToken),senha:token.usuarioSenha(accessToken) ,nome_de_usuario:token.usuarioNome(accessToken),foto:token.usuarioFoto(usuario.token)}, secretKey.secretKey);
                                     
                                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
                 
@@ -688,7 +688,7 @@ const UsersController = {
                            
                                     const usuario = resultado[0] 
                 
-                                    const accessToken2 = jwt.sign({ id_usuario:usuario.id_usuario, email:usuario.email,senha:usuario.senha,nome_de_usuario:usuario.nome_de_usuario }, secretKey.secretKey);
+                                    const accessToken2 = jwt.sign({ id_usuario:usuario.id_usuario, email:usuario.email,senha:usuario.senha,nome_de_usuario:usuario.nome_de_usuario ,foto:token.usuarioFoto(usuario.token)}, secretKey.secretKey);
                                     
                                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
                 
