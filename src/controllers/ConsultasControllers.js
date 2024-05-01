@@ -6,21 +6,21 @@ const regexTime = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
 const ConsultasController = {
 
     cadastrarConsulta: async (req, res) => {
-        const {accessToken, especialidade,data_da_consulta,nome,email} = req.body;
+        const {accessToken, especialidade,data_da_consulta,nome,email,numero} = req.body;
         const id_usuario=token.usuarioId(accessToken);
         console.log(id_usuario==1)
         if(id_usuario==1||!(await token.verificarTokenUsuario(accessToken)) ){
             return res.status(401).json({ mensagem: 'Tokens inválidos' });
         }
     
-        const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,id_usuario) VALUES (?, ?, ?, ?,?)';
+        const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?, ?, ?, ?,?,?)';
     
-        db.query(insertConsulta, [ especialidade,data_da_consulta,nome,email, id_usuario], (err, result) => {
+        db.query(insertConsulta, [ especialidade,data_da_consulta,nome,email,numero, id_usuario], (err, result) => {
             if (err) {
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
     
-            res.status(200).json({ mensagem: 'Consulta adicionada com sucesso' });
+           return res.status(200).json({ mensagem: 'Consulta adicionada com sucesso' });
         });    
     },
     // Método para adicionar um médico à consulta
