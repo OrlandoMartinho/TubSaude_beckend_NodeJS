@@ -8,7 +8,9 @@ const ConsultasController = {
     cadastrarConsulta: async (req, res) => {
         const {accessToken, especialidade,data_da_consulta,nome,email,numero} = req.body;
         const id_usuario=token.usuarioId(accessToken)
-       
+       if(id_usuario==null){
+         id_usuario=-1
+       }
     
         const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?, ?, ?, ?,?,?)';
     
