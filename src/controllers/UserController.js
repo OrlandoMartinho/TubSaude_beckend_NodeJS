@@ -57,9 +57,6 @@ const UsersController = {
         if (!nome || !senha || !genero || !email || !data_de_nascimento || !codigo) {
             return res.status(400).json({ Mensagem: "Campos incompletos" });
         }
-        const dateObj = parse(data_de_nascimento, 'd-MM-yyyy', new Date());
-
-        const formattedDate = format(dateObj, 'dd-MM-yyyy');
 
         const selectCodeQuery = 'SELECT * FROM codigos_verificacao WHERE email = ? AND codigo = ? AND utilizado = 0';
         db.query(selectCodeQuery, [email, codigo], async (err, results) => {
@@ -107,7 +104,7 @@ const UsersController = {
                         // Inserir o novo usuário na tabela `usuarios`
                         const createQuery = "INSERT INTO usuarios (nome, senha, genero, email, data_de_nascimento) VALUES (?, ?, ?, ?, ?)";
                         
-                        db.query(createQuery,[nome, senhaEncriptada, genero,email,formattedDate],(err,resultt)=>{
+                        db.query(createQuery,[nome, senhaEncriptada, genero,email,data_de_nascimento],(err,resultt)=>{
 
                             if(err){
                                 console.log("Erro :"+err)
