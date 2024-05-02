@@ -12,7 +12,7 @@ const ConsultasController = {
          id_usuario=-1
        }
     
-        const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?, ?, ?, ?,?,?)';
+        const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?,?,?,?,?,?)';
     
         db.query(insertConsulta, [ especialidade,data_da_consulta,nome,email,numero, id_usuario], (err, result) => {
             if (err) {
