@@ -7,15 +7,17 @@ const ConsultasController = {
 
     cadastrarConsulta: async (req, res) => {
         const {accessToken, especialidade,data_da_consulta,nome,email,numero} = req.body;
-        const id_usuario=token.usuarioId(accessToken)
-       if(id_usuario==null){
-         id_usuario=-1
+        let id_usuario=token.usuarioId(accessToken)
+        console.log(id_usuario)
+       if(id_usuario===null){
+         id_usuario = -1
        }
     
         const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?,?,?,?,?,?)';
     
         db.query(insertConsulta, [ especialidade,data_da_consulta,nome,email,numero, id_usuario], (err, result) => {
             if (err) {
+                console.log(err.message)
                 return res.status(500).json({ mensagem: 'Erro interno do servidor' });
             }
     
