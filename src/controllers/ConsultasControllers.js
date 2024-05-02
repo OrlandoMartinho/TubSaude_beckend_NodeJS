@@ -7,11 +7,8 @@ const ConsultasController = {
 
     cadastrarConsulta: async (req, res) => {
         const {accessToken, especialidade,data_da_consulta,nome,email,numero} = req.body;
-        const id_usuario=token.usuarioId(accessToken);
-        console.log(id_usuario==1)
-        if(id_usuario==1||!(await token.verificarTokenUsuario(accessToken)) ){
-            return res.status(401).json({ mensagem: 'Tokens inválidos' });
-        }
+        const id_usuario=token.usuarioId(accessToken)
+       
     
         const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?, ?, ?, ?,?,?)';
     

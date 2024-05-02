@@ -133,7 +133,6 @@ connection.connect(async (err) => {
           mensagem VARCHAR(45) DEFAULT NULL,
           data_do_contato DATETIME DEFAULT current_timestamp()
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;`,
-    
       `CREATE TABLE IF NOT EXISTS conversas (
           id_conversa INT AUTO_INCREMENT PRIMARY KEY,
           id_usuario INT NOT NULL,
