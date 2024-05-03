@@ -12,6 +12,11 @@ const ConsultasController = {
        if(id_usuario===null){
          id_usuario = -1
        }
+
+       if(!especialidade||!data_da_consulta||!nome||!email||!numero){
+        console.log("Campos:",especialidade,"-",data_da_consulta,"-",nome,"-",email,"-",numero)
+        return res.status(400).json({ mensagem: 'Complete bem os campos' });
+       }
     
         const insertConsulta = 'INSERT INTO Consultas ( especialidade,data_da_consulta,nome,email,numero,id_usuario) VALUES (?,?,?,?,?,?)';
     
