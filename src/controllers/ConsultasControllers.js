@@ -134,9 +134,9 @@ const ConsultasController = {
             }
 
             if (result.length > 0) {
-                res.status(200).json({ Consultas: result });
+              return  res.status(200).json({ Consultas: result });
             } else {
-                res.status(200).json({ Mensagem: "Sem consultas pendentes" });
+              return  res.status(200).json({ Mensagem: "Sem consultas pendentes" });
             }
         });
     }
