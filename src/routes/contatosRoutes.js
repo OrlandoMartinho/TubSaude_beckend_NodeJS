@@ -11,6 +11,8 @@ router.post('/listar', ContactosController.listarContactos);
 // Rota para obter um contato por ID
 router.post('/obterPorId', ContactosController.obterContactoPorId);
 
+//Rota para responder usuário
+router.post('/responder_usuario',ContactosController.responderUsuario)
 // Rota para eliminar um contato por ID
 router.delete('/eliminar/:id', ContactosController.eliminarContactoPeloId);
 

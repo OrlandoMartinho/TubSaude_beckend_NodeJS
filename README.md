@@ -527,6 +527,19 @@ Este arquivo descreve as rotas disponíveis para lidar com as operações relaci
     "id_contato": "ID do Contato"
   }
   ```
+
+  ### 5. Responder Contactos do usuario
+
+- **Rota**: `POST /contatos/responder_usuario`
+- **Descrição**: Permite excluir um contato pelo seu ID.
+- **Corpo da Requisição**:
+```json
+  {
+    "accessToken": "Token ADM",
+    "email": "email do usuario",
+    "conteudo":"Na bd analiza a rolagem do banco de dados"
+  }
+  ```
 ---
 
 
