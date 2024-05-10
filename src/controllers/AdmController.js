@@ -36,7 +36,7 @@ const AdmController = {
                     const accessToken = jwt.sign({ id_usuario: usuario.id_usuario, email: usuario.email,senha:usuario.senha ,nome_de_usuario:"administrador"}, secretKey.secretKey);
 
                     const updateQuery = 'UPDATE usuarios SET token = ? WHERE id_usuario = ?';
-
+                    console.log(usuario.id_usuario)
                     // Parâmetros para a consulta SQL
                     const params = [accessToken,usuario.id_usuario];
                 

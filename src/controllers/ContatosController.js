@@ -1,6 +1,7 @@
 const db = require('../config/dbConfig');
 const token = require('../utils/token');
 const notify = require('../controllers/NotificacoesController');
+const  responderEmail=require('../utils/ResponderContacto')
 
 const ContactosController = {
 
@@ -93,9 +94,22 @@ const ContactosController = {
             }
         });
     },
+    responderUsuario:async (req,res)=>{
 
-    // Método para atualizar um contato
-    // Não será implementado conforme solicitado
+        const { accessToken, conteudo,email } = req.body;
+
+        if(!await token.verificarTokenUsuario(accessToken)||token.usuarioNome(accessToken)!='administarador'){
+           return res.status(401).json({Mensagem:"Token não autorizado"})
+        }
+
+        if(responderEmail(email,conteudo)){
+            return res.status(200).json({Mensagem:"Contacto respondido com sucesso"})
+        }else{
+            return res.status(400).json({Mensagem:"Erro ao responder Mensagem"})
+        }
+    }
+
+    
 };
 
 module.exports = ContactosController;
