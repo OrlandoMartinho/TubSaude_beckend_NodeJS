@@ -123,6 +123,7 @@ const ConsultasController = {
        
         const {accessToken}=req.body
         const id_usuario=token.usuarioId(accessToken)
+        console.log(id_usuario)
        if(id_usuario!=1||!(await token.verificarTokenUsuario(accessToken)) ){
             return res.status(401).json({ mensagem: 'Tokens inválidos' });
         }

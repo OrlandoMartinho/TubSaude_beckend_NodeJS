@@ -40,7 +40,8 @@ app.use('/contactos',contatosRoutes)
 const PORT = process.env.PORT||3000;
 
 // Inicializando o servidor
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}/`);
+app.listen(PORT, '192.168.137.1',() => {
+  console.log(`Servidor rodando em http://192.168.137.1:${PORT}/`);
 
 });
+ 
